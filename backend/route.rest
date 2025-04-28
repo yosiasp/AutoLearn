@@ -1,0 +1,52 @@
+POST http://localhost:3000/api/register
+Content-Type: application/json
+
+{
+    "name": "John Bu",
+    "email": "johnbu@example.com",
+    "password": "password",
+    "confirmPassword": "password"
+}
+
+###
+
+POST http://localhost:3000/api/login
+Content-Type: application/json
+
+{
+  "email": "johnbu@example.com",
+  "password": "password"
+}
+
+###
+
+PUT http://localhost:3000/api/update/680e38fca61689d91e71f2cf
+Content-Type: application/json
+
+{
+  "name": "Felix Jonathan",
+  "email": "felixjonathan@example.com",
+  "password": "password",
+  "confirmPassword": "password"
+}
+
+###
+
+DELETE http://localhost:3000/api/delete/680e32e8cb59cbdf652c72a9
+
+###
+
+# Catatan: Untuk mengirim file, gunakan tool seperti Postman dengan form-data
+# di mana ada field "message" dan "file" (upload file)
+POST http://localhost:3000/api/680f0116b493cc0901bed404/ollama/chat
+Content-Type: application/json
+
+{
+  "message": "haloo."
+}
+
+###
+
+GET http://localhost:3000/api/680e24a1fccb77a49cd41cd8/ollama/history
+
+
