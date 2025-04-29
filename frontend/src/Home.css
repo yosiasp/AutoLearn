@@ -3,6 +3,7 @@
   height: 100vh;
   background: #10182a;
   color: #fff;
+  font-family: 'Inter', sans-serif;
 }
 
 .sidebar {
@@ -16,15 +17,21 @@
 }
 
 .logo {
-  font-size: 1.7rem;
-  font-weight: bold;
-  margin-bottom: 32px;
-  color: #ff5c00;
-  text-shadow: 0 0 10px rgba(255, 92, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  width: 250px;
+  height: 100px;
+  margin-top: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.logo>img {
+  height: 60%; 
 }
 
 .new-chat-btn {
   background: #232c4b;
+  width: 80%;
   color: #fff;
   border: none;
   border-radius: 8px;

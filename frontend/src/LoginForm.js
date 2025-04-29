@@ -8,6 +8,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
+  // Title
+  useEffect(() => {
+    document.title = "Login";
+  }, []);
   const navigate = useNavigate();
   const [form, setForm] = useState({
     email: '',
@@ -82,16 +86,15 @@ const LoginForm = () => {
   return (
     <div className="login-container">
       <ToastContainer />
+      {/* Logo */}
+      <div className="logo-container">
+        <img src="/logo.png" alt="Logo"/>
+      </div>
+
+      {/* Form card */}
       <div className="login-card">
-        <div className="logo-container">
-          <svg width="86" height="86" viewBox="0 0 86 86" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M51.7984 14.2016C63.3575 25.7607 63.3575 44.4393 51.7984 55.9984C40.2393 67.5575 21.5607 67.5575 10.0016 55.9984C-1.55755 44.4393 -1.55755 25.7607 10.0016 14.2016C21.5607 2.64245 40.2393 2.64245 51.7984 14.2016Z" fill="#FF5C00"/>
-            <path d="M75.9984 14.2016C87.5575 25.7607 87.5575 44.4393 75.9984 55.9984C64.4393 67.5575 45.7607 67.5575 34.2016 55.9984C22.6424 44.4393 22.6424 25.7607 34.2016 14.2016C45.7607 2.64245 64.4393 2.64245 75.9984 14.2016Z" fill="#9747FF"/>
-            <path d="M43 20V50M43 20L35 28M43 20L51 28M30 42.5H56" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <h2>Login to your account</h2>
-        <p>Welcome back to AutoLearn AI assistant</p>
+        <h2>Welcome</h2>
+        <p>Sign in to your account to continue</p>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Email address</label>
