@@ -10,13 +10,13 @@ const app = express();
 
 // Enable CORS for frontend
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     credentials: true
 }));
 
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const MONGOURL = process.env.MONGOURL;
 
 mongoose.connect(MONGOURL).then(() => {

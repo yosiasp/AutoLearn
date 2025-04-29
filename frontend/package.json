@@ -14,10 +14,10 @@
     "react-toastify": "^11.0.5",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "set port=3001 && react-scripts start",
-    "build": "set port=3001 && react-scripts build",
-    "test": "set port=3001 && react-scripts test",
+    "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

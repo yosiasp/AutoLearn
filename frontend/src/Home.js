@@ -13,7 +13,7 @@ const Home = () => {
 
   useEffect(() => {
     if (user._id) {
-      fetch(`http://localhost:3000/api/${user._id}/ollama/history`)
+      fetch(`http://localhost:8000/api/${user._id}/ollama/history`)
         .then(res => res.json())
         .then(data => setHistory(data.history || []))
         .catch(err => setHistory([]));
@@ -78,7 +78,7 @@ const Home = () => {
       }
       formData.append('message', message);
 
-      const res = await fetch(`http://localhost:3000/api/${user._id}/ollama/chat`, {
+      const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chat`, {
         method: "POST",
         body: formData,
       });
