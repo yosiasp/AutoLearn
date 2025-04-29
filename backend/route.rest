@@ -42,7 +42,7 @@ POST http://localhost:3000/api/680f0116b493cc0901bed404/ollama/chat
 Content-Type: application/json
 
 {
-  "message": "haloo."
+  "message": "analisa dari file yang aku berikan"
 }
 
 ###
