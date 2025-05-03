@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { logout } from './services/api';
 import './Home.css';
 
 const Home = () => {
@@ -116,9 +117,14 @@ const Home = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    try {
+      await logout();
+      window.location.href = '/login';
+    } catch(err) {
+      alert("Logout error")
+    }
   };
 
   const toggleDropdown = () => {

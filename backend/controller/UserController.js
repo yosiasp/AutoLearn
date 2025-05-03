@@ -1,5 +1,6 @@
 import User from "../models/UserModel.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
   try {
@@ -20,6 +21,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
+const SECRET = 'your_jwt_secret';
 
 export const loginUser = async (req, res) => {
   try {
@@ -28,15 +30,45 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return res.status(400).json({ message: "Invalid password" });
-  }
-  res.status(200).json({ message: "Login successful", user });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    const token = jwt.sign({ email }, SECRET, { expiresIn: '1d' });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, 
+      sameSite: 'Lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    res.status(200).json({ message: "Login successful", user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const checkToken = async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const user = jwt.verify(token, SECRET);
+    res.json({ user });
+  } catch (err) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
+}
+
+export const logoutUser = async (req, res) => {
+  try{
+    await res.clearCookie('token');
+    res.status(200).json({ message: 'Logged out' });
+  } catch (err) {
+    res.status(403).json({ error: 'Log out error' });
+  }
+}
 
 export const updateUser = async (req, res) => {
   try {

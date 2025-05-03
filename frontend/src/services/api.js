@@ -8,6 +8,7 @@ export const login = async (credentials) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(credentials),
+      credentials: 'include',
     });
     return await response.json();
   } catch (error) {
@@ -31,3 +32,33 @@ export const register = async (userData) => {
     throw error;
   }
 }; 
+
+export const logout = async () => {
+  try {
+    const response = await fetch(`${API_URL}/logout`, {
+      method: 'POST',
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Logout error:', error);
+    throw error;
+  }
+}; 
+
+export const checkToken = async () => {
+  try {
+    const response = await fetch(`${API_URL}/checkToken`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include' 
+    });
+
+    if (!response.ok) throw new Error('Not authenticated');
+    return await response.json();
+  } catch (error) {
+    console.error('Token check error:', error);
+    throw error;
+  }
+};

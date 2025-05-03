@@ -6,6 +6,7 @@ import { login } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { checkToken } from './services/api'; 
 
 const LoginForm = () => {
   // Title
@@ -13,6 +14,20 @@ const LoginForm = () => {
     document.title = "Login";
   }, []);
   const navigate = useNavigate();
+  
+  // Checking for login status
+  useEffect(() => {
+    const verifyLogin = async () => {
+      try {
+        await checkToken(); 
+        navigate('/home'); 
+      } catch (err) {
+        // Not logged in, stay on login page
+      }
+    };
+    verifyLogin();
+  }, []);
+
   const [form, setForm] = useState({
     email: '',
     password: '',
