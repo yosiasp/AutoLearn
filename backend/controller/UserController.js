@@ -1,6 +1,9 @@
 import User from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
@@ -21,7 +24,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-const SECRET = 'your_jwt_secret';
+const KEY = process.env.JWT_KEY;
 
 export const loginUser = async (req, res) => {
   try {
@@ -34,7 +37,7 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid password" });
     }
-    const token = jwt.sign({ email }, SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ email }, KEY, { expiresIn: '1d' });
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -54,7 +57,7 @@ export const checkToken = async (req, res) => {
   if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
-    const user = jwt.verify(token, SECRET);
+    const user = jwt.verify(token, KEY);
     res.json({ user });
   } catch (err) {
     res.status(403).json({ error: 'Invalid token' });

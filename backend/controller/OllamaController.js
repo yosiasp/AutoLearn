@@ -1,18 +1,29 @@
 import ollama from 'ollama';
 import Ollama from '../models/OllamaModel.js';
 import User from '../models/UserModel.js';
+import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import mammoth from 'mammoth';
 import { fileURLToPath } from 'url';
 import pdf from 'pdf-parse';
 
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const KEY = process.env.JWT_KEY;
+
 export const chatWithOllama = async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
     try {
+        // Token check
+        const tokenCheck = jwt.verify(token, KEY);
+
         const { message } = req.body;
         const { userId } = req.params;
         let fileData = null;
@@ -124,7 +135,13 @@ export const chatWithOllama = async (req, res) => {
 }; 
 
 export const getOllamaHistory = async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
     try {
+        // Token check
+        const tokenCheck = jwt.verify(token, KEY);
+        
         const { userId } = req.params;
 
         // Cek user

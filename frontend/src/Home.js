@@ -18,7 +18,7 @@ const Home = () => {
 
   useEffect(() => {
     if (user._id) {
-      fetch(`http://localhost:8000/api/${user._id}/ollama/history`)
+      fetch(`http://localhost:8000/api/${user._id}/ollama/history`, {credentials: 'include'})
         .then(res => res.json())
         .then(data => setHistory(data.history || []))
         .catch(err => setHistory([]));
@@ -86,6 +86,7 @@ const Home = () => {
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chat`, {
         method: "POST",
         body: formData,
+        credentials: 'include',
       });
 
       const data = await res.json();
