@@ -123,3 +123,10 @@
   margin-bottom: 15px;
   font-size: 14px;
 }
+
+/* Adjustments for smartphone */
+@media only screen and (max-width: 600px) {
+  .register-card {
+    width:70%;
+  }
+}

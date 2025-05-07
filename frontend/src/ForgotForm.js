@@ -1,17 +1,17 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useState, useEffect } from 'react';
-import './LoginForm.css';
+import './ForgotForm.css';
 import { login } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { checkToken } from './services/api'; 
 
-const LoginForm = () => {
+const ForgotForm = () => {
   // Title
   useEffect(() => {
-    document.title = "Login";
+    document.title = "Forgot Password";
   }, []);
   const navigate = useNavigate();
   
@@ -22,11 +22,11 @@ const LoginForm = () => {
         await checkToken(); 
         navigate('/home'); 
       } catch (err) {
-        // Not logged in, stay on login page
+        // Not logged in, stay on forgot password page
       }
     };
     verifyLogin();
-  }, );
+  },);
 
   const [form, setForm] = useState({
     email: '',
@@ -99,7 +99,7 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="forgot-container">
       <ToastContainer />
       {/* Logo */}
       <div className="logo-container">
@@ -107,26 +107,21 @@ const LoginForm = () => {
       </div>
 
       {/* Form card */}
-      <div className="login-card">
-        <h2>Welcome</h2>
-        <p>Sign in to your account to continue</p>
+      <div className="forgot-card">
+        <h2>Forgot Password</h2>
+        <p>Enter your email password to reset your password</p>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Email address</label>
           <input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} required />
-          <label>Password</label>
-          <input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} required />
-          <div className="forgot-password">
-            <a href="#" onClick={() => navigate('/forgot-password')}>Forgot password?</a>
-          </div>
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Loading...' : 'Sign In'}
           </button>
         </form>
-        <p className="signup-link">Don't have an account? <a href="#" onClick={() => navigate('/register')}>Create account</a></p>
+        <p className="signin-link"><a href="#" onClick={() => navigate('/login')}>Return to login </a></p>
       </div>
     </div>
   );
 };
 
-export default LoginForm; 
+export default ForgotForm; 

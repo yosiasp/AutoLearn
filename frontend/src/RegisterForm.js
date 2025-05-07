@@ -4,12 +4,29 @@ import { register } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import { checkToken } from './services/api'; 
 
 const RegisterForm = () => {
   // Title
   useEffect(() => {
     document.title = "Login";
   }, []);
+
+  const navigate = useNavigate();
+  // Checking for login status
+  useEffect(() => {
+    const verifyLogin = async () => {
+      try {
+        await checkToken(); 
+        navigate('/home'); 
+      } catch (err) {
+        // Not logged in, stay on forgot password page
+      }
+    };
+    verifyLogin();
+  }, );
+
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -18,7 +35,6 @@ const RegisterForm = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

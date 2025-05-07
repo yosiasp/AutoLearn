@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ProtectedRoute from '../ProtectedRoute';
 import LoginForm from '../LoginForm';
 import RegisterForm from '../RegisterForm';
+import ForgotForm from '../ForgotForm';
 import Home from '../Home';
 
 const AppRoutes = () => {
@@ -12,6 +13,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/forgot-password" element={<ForgotForm />} />
         <Route
           path="/home"
           element={
