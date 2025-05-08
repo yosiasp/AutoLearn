@@ -11,7 +11,7 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.put("/update/:userId", updateUser);
 router.delete("/delete/:userId", deleteUser);
-router.get("/checkToken", checkToken);
+router.post("/checkToken", checkToken);
 
 // Ollama Routes
 router.post("/:userId/ollama/chat", upload.single('file'), chatWithOllama);

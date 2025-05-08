@@ -59,7 +59,7 @@ const LoginForm = () => {
     try {
       const response = await login(form);
       if (response.message === 'Login successful') {
-        toast.success('Login berhasil!', {
+        toast.success('Login successful', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -67,13 +67,16 @@ const LoginForm = () => {
           pauseOnHover: true,
           draggable: true,
         });
-        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('user', JSON.stringify({
+          name: response.user.name,
+          email: response.user.email
+        }));        
         setTimeout(() => {
           navigate('/home');
         }, 2000);
       } else {
         setError(response.message || 'Login failed');
-        toast.error(response.message || 'Login gagal!', {
+        toast.error(response.message || 'Login failed', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -84,7 +87,7 @@ const LoginForm = () => {
       }
     } catch (err) {
       setError('An error occurred during login');
-      toast.error('Terjadi kesalahan saat login!', {
+      toast.error('An error occurred during login', {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,

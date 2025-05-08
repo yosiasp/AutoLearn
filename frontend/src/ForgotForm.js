@@ -59,7 +59,7 @@ const ForgotForm = () => {
     try {
       const response = await login(form);
       if (response.message === 'Login successful') {
-        toast.success('Login berhasil!', {
+        toast.success('Login successful', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -84,7 +84,7 @@ const ForgotForm = () => {
       }
     } catch (err) {
       setError('An error occurred during login');
-      toast.error('Terjadi kesalahan saat login!', {
+      toast.error('An error occurred during login', {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,

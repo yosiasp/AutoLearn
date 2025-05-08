@@ -48,17 +48,21 @@ export const logout = async () => {
 
 export const checkToken = async () => {
   try {
+    const user = JSON.parse(localStorage.getItem('user'));
+
     const response = await fetch(`${API_URL}/checkToken`, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include' 
+      credentials: 'include',
+      body: JSON.stringify({ user }),
     });
 
     if (!response.ok) throw new Error('Not authenticated');
     return await response.json();
   } catch (error) {
+    await localStorage.removeItem('user'); 
     console.error('Token check error:', error);
     throw error;
   }

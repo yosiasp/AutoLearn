@@ -48,7 +48,7 @@ const RegisterForm = () => {
     try {
       const response = await register(form);
       if (response.message === 'User created successfully') {
-        toast.success('Registrasi berhasil! Silakan login', {
+        toast.success('Account created successfully', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -61,7 +61,7 @@ const RegisterForm = () => {
         }, 2000);
       } else {
         setError(response.message || 'Registration failed');
-        toast.error(response.message || 'Registrasi gagal!', {
+        toast.error(response.message || 'Registration failed', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -72,7 +72,7 @@ const RegisterForm = () => {
       }
     } catch (err) {
       setError('An error occurred during registration');
-      toast.error('Terjadi kesalahan saat registrasi!', {
+      toast.error('An error occurred during registration', {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,

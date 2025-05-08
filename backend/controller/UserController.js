@@ -10,7 +10,7 @@ export const registerUser = async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
     const user = await User.findOne({ email });
     if (user) {
-        return res.status(400).json({ message: "User already exists" });
+        return res.status(400).json({ message: "Email already used" });
     }
     if (password !== confirmPassword) {
         return res.status(400).json({ message: "Passwords do not match" });
@@ -54,12 +54,22 @@ export const loginUser = async (req, res) => {
 
 export const checkToken = async (req, res) => {
   const token = req.cookies.token;
+  const { email: storageEmail } = req.body.user;
+
   if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
-    const user = jwt.verify(token, KEY);
-    res.json({ user });
+    const decodedToken = jwt.verify(token, KEY);
+    const cookieEmail = decodedToken.email;
+
+    if (cookieEmail !== storageEmail) {
+      await res.clearCookie('token');
+      return res.status(403).json({ error: 'Email mismatch — invalid token' });
+    }
+
+    res.status(200).json({ message: 'Authenticated', email: storageEmail });
   } catch (err) {
+    await res.clearCookie('token');
     res.status(403).json({ error: 'Invalid token' });
   }
 }
