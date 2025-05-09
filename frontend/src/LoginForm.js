@@ -68,6 +68,7 @@ const LoginForm = () => {
           draggable: true,
         });
         localStorage.setItem('user', JSON.stringify({
+          _id: response.user._id,          
           name: response.user.name,
           email: response.user.email
         }));        
