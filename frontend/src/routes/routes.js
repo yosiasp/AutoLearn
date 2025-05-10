@@ -1,9 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../ProtectedRoute';
+import ProtectedResetRoute from '../ProtectedResetRoute';
 import LoginForm from '../LoginForm';
 import RegisterForm from '../RegisterForm';
 import ForgotForm from '../ForgotForm';
+import ResetPasswordForm from '../ResetPasswordForm';
 import Home from '../Home';
 
 const AppRoutes = () => {
@@ -22,6 +24,11 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/reset-password" element={
+            <ProtectedResetRoute>
+              <ResetPasswordForm />
+            </ProtectedResetRoute>
+          } />
       </Routes>
     </Router>
   );

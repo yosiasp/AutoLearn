@@ -1,36 +1,23 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useState, useEffect } from 'react';
-import './ForgotForm.css';
-import { forgotPassword } from './services/api';
+import './ResetPasswordForm.css';
+import { resetPassword } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import { checkToken } from './services/api'; 
+import { useSearchParams } from 'react-router-dom';
 
-const ForgotForm = () => {
+const ResetPasswordForm = () => {
   // Title
   useEffect(() => {
-    document.title = "Forgot Password";
+    document.title = "Reset Password";
   }, []);
   const navigate = useNavigate();
   
-  // Checking for login status
-  useEffect(() => {
-    const verifyLogin = async () => {
-      try {
-        await checkToken(); 
-        navigate('/home'); 
-      } catch (err) {
-        // Not logged in, stay on forgot password page
-      }
-    };
-    verifyLogin();
-  },);
-
   const [form, setForm] = useState({
-    email: '',
     password: '',
+    confirmPassword: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,15 +38,22 @@ const ForgotForm = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await forgotPassword(form);
-      if (response.message === 'Password reset email sent') {
-        toast.success('Password reset email sent', {
+      const response = await resetPassword({
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+        token: token,
+      });
+      if (response.message === 'Password reset succesfull') {
+        toast.success('Password reset succesfull', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -67,6 +61,9 @@ const ForgotForm = () => {
           pauseOnHover: true,
           draggable: true,
         });
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       } else {
         setError(response.message || 'An error has occured');
         toast.error(response.message || 'An error has occured', {
@@ -95,7 +92,7 @@ const ForgotForm = () => {
   };
 
   return (
-    <div className="forgot-container">
+    <div className="reset-container">
       <ToastContainer />
       {/* Logo */}
       <div className="logo-container">
@@ -103,21 +100,22 @@ const ForgotForm = () => {
       </div>
 
       {/* Form card */}
-      <div className="forgot-card">
-        <h2>Forgot Password</h2>
-        <p>Enter your email password to reset your password</p>
+      <div className="reset-card">
+        <h2>Reset Password</h2>
+        <p>Enter your new password</p>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <label>Email address</label>
-          <input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} required />
+          <label>Password</label>
+          <input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} required />
+          <label>Confirm Password</label>
+          <input name="confirmPassword" type="password" placeholder="Confirm your password" value={form.confirmPassword} onChange={handleChange} required />
           <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Send Email'}
+            {isLoading ? 'Loading...' : 'Reset password'}
           </button>
         </form>
-        <p className="signin-link"><a href="#" onClick={() => navigate('/login')}>Return to login </a></p>
       </div>
     </div>
   );
 };
 
-export default ForgotForm; 
+export default ResetPasswordForm; 

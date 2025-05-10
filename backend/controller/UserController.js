@@ -2,6 +2,8 @@ import User from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -116,6 +118,106 @@ export const deleteUser = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
     res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    // Saving reset password information
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expire time
+    await user.save();
+
+    const resetURL = `http://localhost:3000/reset-password?token=${token}`;
+
+    // Nodemailer configuration
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.ACCOUNT_EMAIL,      
+        pass: process.env.ACCOUNT_PASSWORD,   
+      },
+    });
+
+    // Sending the email
+    const mailOptions = {
+      from: 'Autolearn <${process.env.ACCOUNT_EMAIL}>',
+      to: email,
+      subject: 'Reset your Autolearn password',
+      text: `You are receiving this email because you have requested a password reset. Click on this link to reset your password:\n\n${resetURL}\n\nThis link will expire in 1 hour.\nIf you didn't request a password reset, you can ignore this email. Your password will not be changed\n\nSincerly,\n\nAutolearn Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Password reset email sent' });
+  } catch (err) {
+    console.error('Error in forgotPassword:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const validateResetToken = async (req, res) => {
+  try {
+    const { token } = req.body; 
+
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }, 
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    res.status(200).json({ message: 'Token is valid' });
+  } catch (err) {
+    console.error('Token validation error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword, token } = req.body;
+    if (password && password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    // Find user by token
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Updating the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    // Resetting the token
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    
+    await user.save();
+    
+    res.status(200).json({ message: "Password reset succesfull"});
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
