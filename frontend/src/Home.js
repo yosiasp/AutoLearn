@@ -237,6 +237,7 @@ const Home = () => {
             <label className="file-upload-label">
               <input
                 type="file"
+                accept=".docx, application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.txt"
                 onChange={handleFileChange}
                 style={{ display: 'none' }}
               />

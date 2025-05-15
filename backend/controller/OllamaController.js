@@ -62,7 +62,7 @@ export const chatWithOllama = async (req, res) => {
                 const pdfData = await pdf(dataBuffer);
                 fileData = pdfData.text;
                 prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
-            } else if (fileType === 'application/docx') {
+            } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
                 const dataBuffer = fs.readFileSync(req.file.path);
                 const result = await mammoth.extractRawText({ buffer: dataBuffer });
                 fileData = result.value;
