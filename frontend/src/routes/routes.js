@@ -7,6 +7,7 @@ import RegisterForm from '../RegisterForm';
 import ForgotForm from '../ForgotForm';
 import ResetPasswordForm from '../ResetPasswordForm';
 import Home from '../Home';
+import Settings from '../Settings';
 
 const AppRoutes = () => {
   return (
@@ -21,6 +22,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
