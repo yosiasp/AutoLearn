@@ -99,6 +99,14 @@ const RegisterForm = () => {
       <div className="register-card">
         <h2>Create your account</h2>
         <p>Join Autolearn and start chatting with our AI assistant</p>
+        <div className="login-method-icon">
+          <div className="google-icon-wrapper">
+            <img src="/google-icon.png" alt="Google Login" />
+          </div>
+        </div>
+        <div className="separator">
+          <span>or</span>
+        </div>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Full Name</label>
