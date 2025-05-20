@@ -92,6 +92,16 @@
   cursor: not-allowed;
 }
 
+.password-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.password-row input {
+  flex: 1;
+}
+
 .signin-link {
   text-align: center;
   margin-top: 1rem;

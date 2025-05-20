@@ -29,7 +29,7 @@ const LoginForm = () => {
   }, );
 
   const [form, setForm] = useState({
-    email: '',
+    emailOrUsername: '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -70,6 +70,7 @@ const LoginForm = () => {
         localStorage.setItem('user', JSON.stringify({
           _id: response.user._id,          
           name: response.user.name,
+          username: response.user.username,
           email: response.user.email
         }));        
         setTimeout(() => {
@@ -116,8 +117,8 @@ const LoginForm = () => {
         <p>Sign in to your account to continue</p>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <label>Email address</label>
-          <input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} required />
+          <label>Username or Email address</label>
+          <input name="emailOrUsername" type="text" placeholder="Enter your username or email" value={form.emailOrUsername} onChange={handleChange} required />
           <label>Password</label>
           <input name="password" type="password" placeholder="Enter your password" value={form.password} onChange={handleChange} required />
           <div className="forgot-password">

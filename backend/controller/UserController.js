@@ -9,16 +9,20 @@ dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
-    const user = await User.findOne({ email });
-    if (user) {
+    const { name, username, email, password, confirmPassword } = req.body;
+    const userWithEmail = await User.findOne({ email });
+    if (userWithEmail) {
         return res.status(400).json({ message: "Email already used" });
+    }
+    const userWithUsername = await User.findOne({ username });
+    if (userWithUsername) {
+        return res.status(400).json({ message: "Username already used" });
     }
     if (password !== confirmPassword) {
         return res.status(400).json({ message: "Passwords do not match" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({ name, username, email, password: hashedPassword });
     await newUser.save();
     res.status(201).json({ message: "User created successfully", user: newUser });
   } catch (error) {
@@ -30,8 +34,16 @@ const KEY = process.env.JWT_KEY;
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const { emailOrUsername, password } = req.body;
+
+    // Check if input is an email 
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrUsername);
+
+    // Find user by email or username
+    const user = await User.findOne(
+      isEmail ? { email: emailOrUsername } : { username: emailOrUsername }
+    );
+
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -39,13 +51,13 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid password" });
     }
-    const token = jwt.sign({ email }, KEY, { expiresIn: '1d' });
+    const token = jwt.sign({ id: user._id, email: user.email }, KEY, { expiresIn: '1d' });
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: false, 
       sameSite: 'Lax',
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
+      maxAge: 24 * 60 * 60 * 1000 // 1 day to expire
     });
 
     res.status(200).json({ message: "Login successful", user });

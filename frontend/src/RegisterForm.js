@@ -9,7 +9,7 @@ import { checkToken } from './services/api';
 const RegisterForm = () => {
   // Title
   useEffect(() => {
-    document.title = "Login";
+    document.title = "Register";
   }, []);
 
   const navigate = useNavigate();
@@ -29,6 +29,7 @@ const RegisterForm = () => {
 
   const [form, setForm] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -102,12 +103,31 @@ const RegisterForm = () => {
         <form onSubmit={handleSubmit}>
           <label>Full Name</label>
           <input name="name" type="text" placeholder="Enter your full name" value={form.name} onChange={handleChange} required />
-          <label>Email address</label>
+          <label>Username</label>
+          <input name="username" type="text" placeholder="Enter your desired username" value={form.username} onChange={handleChange} required />
+          <label>Email Address</label>
           <input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} required />
           <label>Password</label>
-          <input name="password" type="password" placeholder="Create a password" value={form.password} onChange={handleChange} required />
-          <label>Confirm Password</label>
-          <input name="confirmPassword" type="password" placeholder="Confirm your password" value={form.confirmPassword} onChange={handleChange} required />
+          <label style={{ display: 'none' }}>Confirm Password</label>
+          <div className="password-row">
+            <input
+              name="password"
+              type="password"
+              placeholder="Create a password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Loading...' : 'Create Account'}
           </button>
