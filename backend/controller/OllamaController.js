@@ -8,6 +8,7 @@ import path from 'path';
 import mammoth from 'mammoth';
 import { fileURLToPath } from 'url';
 import pdf from 'pdf-parse';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ export const chatWithOllama = async (req, res) => {
         // Token check
         const tokenCheck = jwt.verify(token, KEY);
 
-        const { message } = req.body;
+        const { message, chatId } = req.body;
         const { userId } = req.params;
         let fileData = null;
         let fileName = null;
@@ -75,7 +76,7 @@ export const chatWithOllama = async (req, res) => {
 
         // Chat dengan Ollama
         const response = await ollama.chat({
-            model: 'AutoLearn', 
+            model: 'ModelIndonesia', 
             messages: [{ role: 'user', content: prompt }]
         });
 
@@ -96,6 +97,7 @@ export const chatWithOllama = async (req, res) => {
             message: message,
             response: formattedResponse,
             user: userId,
+            chatId: chatId,
             fileData: fileData,
             fileName: fileName,
             fileType: fileType
@@ -112,8 +114,23 @@ export const chatWithOllama = async (req, res) => {
         }
 
         res.status(200).json({
-            response: formattedResponse,
-            history: ollamaResponse
+            userMessage: {
+                message: message,
+                timestamp: new Date(),
+                isUser: true,
+                status: 'sent',
+                file: req.file ? {
+                    name: fileName,
+                    type: fileType,
+                    preview: fileType?.startsWith('image/') ? fileData : null
+                } : null
+            },
+            aiResponse: {
+                message: formattedResponse,
+                timestamp: new Date(),
+                isUser: false,
+                status: 'sent'
+            }
         });
     } catch (error) {
         console.error('Error in chatWithOllama:', error);
@@ -152,11 +169,125 @@ export const getOllamaHistory = async (req, res) => {
 
         // Ambil history
         const ollamaHistory = await Ollama.find({ user: userId })
-            .sort({ createdAt: -1 }); // Urutkan dari yang terbaru
+            .sort({ createdAt: 1 }); // Urutkan dari yang terlama ke terbaru
 
-        res.status(200).json(ollamaHistory);
+        // Format history untuk frontend
+        const formattedHistory = ollamaHistory.flatMap(chat => [
+            {
+                message: chat.message,
+                timestamp: chat.createdAt,
+                isUser: true,
+                status: 'sent',
+                file: chat.fileName ? {
+                    name: chat.fileName,
+                    type: chat.fileType,
+                    preview: chat.fileType?.startsWith('image/') ? chat.fileData : null
+                } : null
+            },
+            {
+                message: chat.response,
+                timestamp: chat.createdAt,
+                isUser: false,
+                status: 'sent'
+            }
+        ]);
+
+        res.status(200).json(formattedHistory);
     } catch (error) {
         console.error('Error in getOllamaHistory:', error);
+        res.status(500).json({ 
+            message: "Internal server error",
+            error: error.message 
+        });
+    }
+};
+
+export const getChatList = async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
+    try {
+        // Token check
+        const tokenCheck = jwt.verify(token, KEY);
+        
+        const { userId } = req.params;
+
+        // Cek user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Ambil daftar chat
+        const chats = await Ollama.aggregate([
+            { $match: { user: mongoose.Types.ObjectId(userId) } },
+            { $sort: { createdAt: -1 } },
+            { $group: {
+                _id: "$chatId",
+                title: { $first: "$message" },
+                createdAt: { $first: "$createdAt" },
+                lastMessage: { $first: "$message" }
+            }},
+            { $sort: { createdAt: -1 } }
+        ]);
+
+        // Pastikan response selalu berupa array
+        res.status(200).json(Array.isArray(chats) ? chats : []);
+    } catch (error) {
+        console.error('Error in getChatList:', error);
+        res.status(500).json({ 
+            message: "Internal server error",
+            error: error.message 
+        });
+    }
+};
+
+export const getChatHistory = async (req, res) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
+
+    try {
+        // Token check
+        const tokenCheck = jwt.verify(token, KEY);
+        
+        const { userId, chatId } = req.params;
+
+        // Cek user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Ambil history chat
+        const chatHistory = await Ollama.find({ 
+            user: userId,
+            chatId: chatId 
+        }).sort({ createdAt: 1 });
+
+        // Format history untuk frontend
+        const formattedHistory = chatHistory.flatMap(chat => [
+            {
+                message: chat.message || '',
+                timestamp: chat.createdAt || new Date(),
+                isUser: true,
+                status: 'sent',
+                file: chat.fileName ? {
+                    name: chat.fileName,
+                    type: chat.fileType,
+                    preview: chat.fileType?.startsWith('image/') ? chat.fileData : null
+                } : null
+            },
+            {
+                message: chat.response || '',
+                timestamp: chat.createdAt || new Date(),
+                isUser: false,
+                status: 'sent'
+            }
+        ]);
+
+        res.status(200).json(formattedHistory);
+    } catch (error) {
+        console.error('Error in getChatHistory:', error);
         res.status(500).json({ 
             message: "Internal server error",
             error: error.message 

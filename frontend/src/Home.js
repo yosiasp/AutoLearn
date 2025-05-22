@@ -8,7 +8,9 @@ const Home = () => {
     document.title = "Home";
   }, []);
   const user = JSON.parse(localStorage.getItem('user')) || {};
+  const [currentChatId, setCurrentChatId] = useState(null);
   const [history, setHistory] = useState([]);
+  const [chatList, setChatList] = useState([]);
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [file, setFile] = useState(null);
@@ -18,12 +20,56 @@ const Home = () => {
 
   useEffect(() => {
     if (user._id) {
-      fetch(`http://localhost:8000/api/${user._id}/ollama/history`, {credentials: 'include'})
-        .then(res => res.json())
-        .then(data => setHistory(data.history || []))
-        .catch(err => setHistory([]));
+      fetchChatList();
     }
   }, [user._id]);
+
+  const fetchChatList = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chats`, {
+        credentials: 'include'
+      });
+      const data = await res.json();
+      setChatList(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching chat list:', err);
+      setChatList([]);
+    }
+  };
+
+  const fetchHistory = async (chatId) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/history/${chatId}`, {
+        credentials: 'include'
+      });
+      const data = await res.json();
+      const formattedHistory = Array.isArray(data) ? data.filter(item => item && typeof item === 'object').map(item => ({
+        message: item.message || '',
+        timestamp: item.timestamp || new Date(),
+        isUser: item.isUser || false,
+        status: item.status || 'sent',
+        file: item.file || null
+      })) : [];
+      setHistory(formattedHistory);
+    } catch (err) {
+      console.error('Error fetching history:', err);
+      setHistory([]);
+    }
+  };
+
+  const handleNewChat = () => {
+    const newChatId = `chat_${Date.now()}`; // Generate a unique chatId
+    setCurrentChatId(newChatId);
+    setHistory([]);
+    setMessage("");
+    setFile(null);
+    setFilePreview(null);
+  };
+
+  const handleSelectChat = async (chatId) => {
+    setCurrentChatId(chatId);
+    await fetchHistory(chatId);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -74,6 +120,8 @@ const Home = () => {
         preview: filePreview
       } : null
     };
+
+    // Add temporary message to history
     setHistory(prev => [...prev, tempMessage]);
 
     try {
@@ -82,6 +130,7 @@ const Home = () => {
         formData.append('file', file);
       }
       formData.append('message', message);
+      formData.append('chatId', currentChatId); // Include chatId in the request
 
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chat`, {
         method: "POST",
@@ -91,18 +140,13 @@ const Home = () => {
 
       const data = await res.json();
       
-      // Update the message status
+      // Update the temporary message status and add AI response
       setHistory(prev => prev.map(msg => 
         msg === tempMessage ? { ...msg, status: 'sent' } : msg
-      ));
+      ).concat(data.aiResponse));
 
-      // Add the response
-      setHistory(prev => [...prev, {
-        message: data.response,
-        timestamp: new Date(),
-        isUser: false,
-        status: 'sent'
-      }]);
+      // Refresh chat list
+      await fetchChatList();
 
       setMessage("");
       setFile(null);
@@ -169,7 +213,23 @@ const Home = () => {
         <div className="logo">
           <img src="/logo.png" alt="Logo"/>
         </div>
-        <button className="new-chat-btn">New Chat</button>
+        <button className="new-chat-btn" onClick={handleNewChat}>New Chat</button>
+        <div className="chat-list">
+          {Array.isArray(chatList) && chatList.map((chat) => (
+            <div 
+              key={chat._id} 
+              className={`chat-item ${currentChatId === chat._id ? 'active' : ''}`}
+              onClick={() => handleSelectChat(chat._id)}
+            >
+              <div className="chat-item-title">
+                {chat.title || 'New Chat'}
+              </div>
+              <div className="chat-item-date">
+                {new Date(chat.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+          ))}
+        </div>
       </aside>
       <main className="main-chat">
         <header className="chat-header">
@@ -179,7 +239,7 @@ const Home = () => {
               <span className="user-avatar">
                 {user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
               </span>
-              <span className="user-name">{user.username || 'Unknown User'}</span>
+              <span className="user-name">{user.name || 'Unknown User'}</span>
               <span className="dropdown-arrow">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                   <path fill="currentColor" d="M7,10L12,15L17,10H7Z" />
@@ -213,21 +273,23 @@ const Home = () => {
           ) : (
             <div className="chat-history">
               {history.map((item, idx) => (
-                <div key={idx} className={`chat-bubble ${item.isUser ? 'user' : 'bot'}`}>
-                  {item.file && renderFilePreview(item.file)}
-                  <div className="bubble-content">
-                    {item.isUser ? (
-                      item.message
-                    ) : (
-                      <div dangerouslySetInnerHTML={{ __html: item.message }} />
-                    )}
+                item && (
+                  <div key={idx} className={`chat-bubble ${item.isUser ? 'user' : 'bot'}`}>
+                    {item.file && renderFilePreview(item.file)}
+                    <div className="bubble-content">
+                      {item.isUser ? (
+                        item.message
+                      ) : (
+                        <div dangerouslySetInnerHTML={{ __html: item.message }} />
+                      )}
+                    </div>
+                    <div className="bubble-meta">
+                      <span className="bubble-time">{formatTime(item.timestamp)}</span>
+                      {item.status === 'sending' && <span className="bubble-status">Sending...</span>}
+                      {item.status === 'error' && <span className="bubble-status error">Failed to send</span>}
+                    </div>
                   </div>
-                  <div className="bubble-meta">
-                    <span className="bubble-time">{formatTime(item.timestamp)}</span>
-                    {item.status === 'sending' && <span className="bubble-status">Sending...</span>}
-                    {item.status === 'error' && <span className="bubble-status error">Failed to send</span>}
-                  </div>
-                </div>
+                )
               ))}
             </div>
           )}

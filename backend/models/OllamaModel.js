@@ -14,6 +14,10 @@ const ollamaSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    chatId: {
+        type: String,
+        required: false
+    },
     fileData: {
         type: String,
         required: false
