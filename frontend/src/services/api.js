@@ -49,14 +49,13 @@ export const register = async (userData) => {
   }
 }; 
 
-export const updateUser = async (userData) => {
+export const updateBasicInfo = async (userData) => {
   try {
-    const response = await fetch(`${API_URL}/basicInfoUpdate`, {
+    const response = await fetch(`${API_URL}/update/basicInfo`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
       body: JSON.stringify(userData),
     });
     return await response.json();

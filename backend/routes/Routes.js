@@ -8,13 +8,14 @@ const router = express.Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
+router.put('/update/basicInfo', updateBasicInfo);
 router.put("/update/:userId", updateUser);
 router.delete("/delete/:userId", deleteUser);
 router.post("/checkToken", checkToken);
 router.post('/forgotPassword', forgotPassword);
 router.post('/checkResetToken', validateResetToken);
 router.post('/resetPassword', resetPassword);
-router.put('/basicInfoUpdate', updateBasicInfo);
+
 
 
 

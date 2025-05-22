@@ -124,29 +124,28 @@ export const updateUser = async (req, res) => {
 
 export const updateBasicInfo = async (req, res) => {
   try {
-    const { userId, name, username } = req.body;
+    const { id, name, username } = req.body;
 
-    if (!userId || !name || !username) {
-      return res.status(400).json({ message: 'userId, name, dan username wajib diisi.' });
+    if (!id || !name || !username) {
+      return res.status(400).json({ message: 'Credentials is not complete' });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      id,
       { name, username },
-      { new: true } // agar hasil return berupa data terbaru
+      { new: true } 
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User tidak ditemukan.' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     return res.status(200).json({
-      message: 'Data user berhasil diperbarui.',
+      message: 'Basic info updated succesfully',
       user: updatedUser
     });
   } catch (error) {
-    console.error('Gagal update basic info:', error);
-    return res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui data.' });
+    return res.status(500).json({ message: 'An error occured while updating data' });
   }
 };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logout, updateUser } from './services/api';
+import { logout, updateBasicInfo } from './services/api';
+import { ToastContainer, toast } from 'react-toastify';
 import './Settings.css';
 
 const Settings = () => {
@@ -11,8 +12,12 @@ const Settings = () => {
   const [name, setName] = useState(user.name || '');
   const [username, setUsername] = useState(user.username || '');
   const [email, setEmail] = useState(user.email || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('basic'); // default menu
+  const [error, setError] = useState('');
   const dropdownRef = useRef(null);
 
   const handleReturnHome = async () => {
@@ -39,15 +44,30 @@ const Settings = () => {
   
   const handleSaveBasicInfo = async (e) => {
     e.preventDefault();
+    const id = user._id;
 
     try {
-      const response = await updateUser({ name, username });
-
-      if (response.success) {
-        localStorage.setItem('user', JSON.stringify(response.user));
-        alert("Basic info updated successfully.");
+      const response = await updateBasicInfo({ id, name, username });
+      if (response.message === 'Basic info updated succesfully') {
+        toast.success('Basic info updated succesfully', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        localStorage.setItem('user', JSON.stringify(response.user));        
       } else {
-        alert("Failed to update user");
+        setError(response.message || 'Update failed');
+        toast.error(response.message || 'Update failed', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     } catch (err) {
       console.error(err);
@@ -69,7 +89,7 @@ const Settings = () => {
             Username:
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
           </label>
-          <button type="submit">Save</button>
+          <button type="submit">Update Info</button>
         </form>
       );
       case 'account':
@@ -80,13 +100,28 @@ const Settings = () => {
               Email:
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </label>
-            <label>
-              Password:
-              <input type="text" value={''} onChange={(e) => setName(e.target.value)} />
-            </label>
-            <button type="submit">Update</button>
+            <button type="submit">Update Email</button>
           </form>
         );
+        case 'password':
+          return (
+            <form className="form-settings">
+              <h2>Account Info</h2>
+              <label>
+                Current Password:
+                <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+              </label>
+              <label>
+                New Password:
+                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              </label>
+              <label>
+                Confirm Password:
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              </label>
+              <button type="submit">Update</button>
+            </form>
+          );
       case 'delete':
         return (
           <div className="form-settings">
@@ -102,12 +137,14 @@ const Settings = () => {
 
   return (
     <div className="settings-root">
+      <ToastContainer />
       <aside className="sidebar">
         <div className="logo">
           <img src="/logo.png" alt="Logo"/>
         </div>
         <button className={`sidebar-btn ${selectedMenu === 'basic' ? 'active' : ''}`} onClick={() => setSelectedMenu('basic')}>Basic Info</button>
         <button className={`sidebar-btn ${selectedMenu === 'account' ? 'active' : ''}`} onClick={() => setSelectedMenu('account')}>Account Info</button>
+        <button className={`sidebar-btn ${selectedMenu === 'password' ? 'active' : ''}`} onClick={() => setSelectedMenu('password')}>Change Password</button>
         <button className={`sidebar-btn ${selectedMenu === 'delete' ? 'active' : ''}`} onClick={() => setSelectedMenu('delete')}>Delete Account</button>
       </aside>
       <main className="main-content">
