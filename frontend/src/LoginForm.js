@@ -130,6 +130,24 @@ const LoginForm = () => {
         </form>
         <p className="signup-link">Don't have an account? <a href="#" onClick={() => navigate('/register')}>Create account</a></p>
       </div>
+      {/* Info Section */}
+      <div className="info-section">
+        <h3>Tentang AutoLearn</h3>
+        <div className="info-grid">
+          <div className="info-card">
+            <h4>Pembelajaran Adaptif</h4>
+            <p>Sistem pembelajaran yang menyesuaikan dengan kemampuan dan gaya belajar Anda</p>
+          </div>
+          <div className="info-card">
+            <h4>AI Powered</h4>
+            <p>Didukung oleh teknologi AI untuk pengalaman belajar yang lebih baik</p>
+          </div>
+          <div className="info-card">
+            <h4>Progress Tracking</h4>
+            <p>Pantau perkembangan belajar Anda dengan analisis detail dan rekomendasi</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

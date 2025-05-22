@@ -141,3 +141,73 @@
     width:70%;
   }
 }
+
+/* Info Section Styles */
+.info-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+}
+
+.info-section h3 {
+  color: #FAF9F6;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 0 1rem;
+}
+
+.info-card {
+  background: rgba(25, 27, 51, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+}
+
+.info-card h4 {
+  color: #5a2de0;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.info-card p {
+  color: #b0b3c6;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Responsive design for info section */
+@media only screen and (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-section {
+    padding: 1rem;
+  }
+  
+  .info-section h3 {
+    font-size: 1.5rem;
+  }
+}
