@@ -1,10 +1,7 @@
 import express from "express";
-import { registerUser, loginUser, logoutUser, checkToken, updateUser, deleteUser, forgotPassword, validateResetToken, resetPassword } from "../controller/UserController.js";
 import { chatWithOllama, getOllamaHistory, getChatList, getChatHistory } from "../controller/OllamaController.js";
 import { registerUser, loginUser, logoutUser, checkToken, updateUser, deleteUser, forgotPassword, validateResetToken, resetPassword, updateBasicInfo } from "../controller/UserController.js";
-import { chatWithOllama, getOllamaHistory } from "../controller/OllamaController.js";
 import upload from "../config/multer.js";
-
 const router = express.Router();
 
 // User Routes
