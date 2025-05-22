@@ -122,6 +122,34 @@ export const updateUser = async (req, res) => {
   }
 };
 
+export const updateBasicInfo = async (req, res) => {
+  try {
+    const { userId, name, username } = req.body;
+
+    if (!userId || !name || !username) {
+      return res.status(400).json({ message: 'userId, name, dan username wajib diisi.' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name, username },
+      { new: true } // agar hasil return berupa data terbaru
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User tidak ditemukan.' });
+    }
+
+    return res.status(200).json({
+      message: 'Data user berhasil diperbarui.',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Gagal update basic info:', error);
+    return res.status(500).json({ message: 'Terjadi kesalahan saat memperbarui data.' });
+  }
+};
+
 export const deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;

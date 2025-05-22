@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logout } from './services/api';
+import { logout, updateUser } from './services/api';
 import './Settings.css';
 
 const Settings = () => {
@@ -36,24 +36,42 @@ const Settings = () => {
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
   };
+  
+  const handleSaveBasicInfo = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await updateUser({ name, username });
+
+      if (response.success) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+        alert("Basic info updated successfully.");
+      } else {
+        alert("Failed to update user");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while updating");
+    }
+  };
 
    const selectedContent = () => {
     switch (selectedMenu) {
-      case 'basic':
-        return (
-          <form className="form-settings">
-            <h2>Basic Info</h2>
-            <label>
-              Full Name:
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
-            <label>
-              Username:
-              <input type="text" value={username} onChange={(e) => setName(e.target.value)} />
-            </label>
-            <button type="submit">Save</button>
-          </form>
-        );
+    case 'basic':
+      return (
+        <form className="form-settings" onSubmit={handleSaveBasicInfo}>
+          <h2>Basic Info</h2>
+          <label>
+            Full Name:
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+          </label>
+          <label>
+            Username:
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+          </label>
+          <button type="submit">Save</button>
+        </form>
+      );
       case 'account':
         return (
           <form className="form-settings">

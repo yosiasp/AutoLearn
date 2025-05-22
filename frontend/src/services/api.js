@@ -49,6 +49,23 @@ export const register = async (userData) => {
   }
 }; 
 
+export const updateUser = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/basicInfoUpdate`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(userData),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Update user profile error:', error);
+    throw error;
+  }
+};
+
 export const logout = async () => {
   try {
     const response = await fetch(`${API_URL}/logout`, {
