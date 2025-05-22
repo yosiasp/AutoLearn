@@ -47,9 +47,30 @@ export const login = async (userData) => {
       throw new Error(errorData.message || 'Login failed');
     }
 
-    return response.json();
+    const data = await response.json();
+    // Store user data in localStorage
+    localStorage.setItem('user', JSON.stringify(data.user));
+    return data;
   } catch (error) {
     console.error('Login error:', error);
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await fetch(`${API_URL}/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Logout failed');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Logout error:', error);
     throw error;
   }
 }; 
