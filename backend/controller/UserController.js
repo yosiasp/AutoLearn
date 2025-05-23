@@ -141,11 +141,65 @@ export const updateBasicInfo = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: 'Basic info updated succesfully',
+      message: 'Basic info updated successfully',
       user: updatedUser
     });
   } catch (error) {
     return res.status(500).json({ message: 'An error occured while updating data' });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  const { id, currentPassword, newPassword, confirmPassword } = req.body;
+  console.log(req.body);
+  if (!id || !currentPassword || !newPassword || !confirmPassword) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ message: 'New password and confirmation do not match' });
+  }
+
+  try {
+    console.log('Request body:', req.body);
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Current password is incorrect' });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    // Generate new token
+    const token = jwt.sign({ id: user._id, email: user.email }, KEY, { expiresIn: '1d' });
+
+    // Set new cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'Lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    // Return updated user data without sensitive information
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt
+    };
+
+    res.json({ 
+      message: 'Password updated successfully',
+      user: userResponse
+    });
+  } catch (err) {
+    console.error('Password update error:', err);
+    res.status(500).json({ message: 'Server error'});
   }
 };
 

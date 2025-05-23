@@ -65,6 +65,22 @@ export const updateBasicInfo = async (userData) => {
   }
 };
 
+export const updatePassword = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/update/currentPassword`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Update password error:', error);
+    throw error;
+  }
+};
+
 export const logout = async () => {
   try {
     const response = await fetch(`${API_URL}/logout`, {
