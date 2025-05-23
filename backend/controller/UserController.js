@@ -173,7 +173,30 @@ export const updatePassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    res.json({ message: 'Password updated successfully' });
+    // Generate new token
+    const token = jwt.sign({ id: user._id, email: user.email }, KEY, { expiresIn: '1d' });
+
+    // Set new cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'Lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    // Return updated user data without sensitive information
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt
+    };
+
+    res.json({ 
+      message: 'Password updated successfully',
+      user: userResponse
+    });
   } catch (err) {
     console.error('Password update error:', err);
     res.status(500).json({ message: 'Server error'});

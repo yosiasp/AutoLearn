@@ -22,9 +22,30 @@ const Settings = () => {
 
   const handleReturnHome = async () => {
     try {
+      // Check token validity before redirecting
+      const response = await fetch('http://localhost:8000/api/checkToken', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ user: JSON.parse(localStorage.getItem('user')) })
+      });
+
+      if (!response.ok) {
+        // If token is invalid, redirect to login
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
+
+      // If token is valid, redirect to home
       window.location.href = '/home';
     } catch(err) {
-      alert("An error occured")
+      console.error('Error checking token:', err);
+      // On error, redirect to login for safety
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
   };
 
@@ -82,6 +103,11 @@ const Settings = () => {
     try {
       const response = await updatePassword({ id, currentPassword, newPassword, confirmPassword });
       if (response.message === 'Password updated successfully') {
+        // Clear sensitive data
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        
         toast.success('Password updated successfully', {
           position: "top-right",
           autoClose: 3000,
@@ -90,7 +116,16 @@ const Settings = () => {
           pauseOnHover: true,
           draggable: true,
         });
-        localStorage.setItem('user', JSON.stringify(response.user));        
+
+        // Update user data in localStorage
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+        }
+
+        // Wait for toast to be visible before redirecting
+        setTimeout(() => {
+          handleReturnHome();
+        }, 1000);
       } else {
         setError(response.message || 'Update failed');
         toast.error(response.message || 'Update failed', {
@@ -104,7 +139,14 @@ const Settings = () => {
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred while updating");
+      toast.error("An error occurred while updating password", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
