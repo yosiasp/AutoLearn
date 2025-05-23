@@ -22,30 +22,9 @@ const Settings = () => {
 
   const handleReturnHome = async () => {
     try {
-      // Check token validity before redirecting
-      const response = await fetch('http://localhost:8000/api/checkToken', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ user: JSON.parse(localStorage.getItem('user')) })
-      });
-
-      if (!response.ok) {
-        // If token is invalid, redirect to login
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        return;
-      }
-
-      // If token is valid, redirect to home
       window.location.href = '/home';
     } catch(err) {
-      console.error('Error checking token:', err);
-      // On error, redirect to login for safety
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      alert("An error occured")
     }
   };
 

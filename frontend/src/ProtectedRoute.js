@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { checkToken } from './services/api';
+import { checkToken, logout } from './services/api';
 
 const ProtectedRoute = ({ children }) => {
   const [auth, setAuth] = useState(null); 
@@ -11,6 +11,21 @@ const ProtectedRoute = ({ children }) => {
         await checkToken(); 
         setAuth(true);
       } catch {
+        const hasToken = document.cookie.includes('token');
+        const hasUser = localStorage.getItem('user');
+
+        if (hasToken) {
+          try {
+            await logout(); 
+          } catch (err) {
+            console.error('Logout error:', err);
+          }
+        }
+
+        if(hasUser){
+          await localStorage.removeItem('user'); 
+        }
+
         setAuth(false);
       }
     };
