@@ -8,12 +8,13 @@ import ForgotForm from '../ForgotForm';
 import ResetPasswordForm from '../ResetPasswordForm';
 import Home from '../Home';
 import Settings from '../Settings';
+import Overview from '../Overview';
 
 const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Overview />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/forgot-password" element={<ForgotForm />} />

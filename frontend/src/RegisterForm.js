@@ -90,6 +90,13 @@ const RegisterForm = () => {
   return (
     <div className="register-container">
       <ToastContainer />
+      {/* Back Button */}
+      <div className="back-button" onClick={() => navigate('/')}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12H5" stroke="#FAF9F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M12 19L5 12L12 5" stroke="#FAF9F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
       {/* Logo */}
       <div className="logo-container">
         <img src="/logo.png" alt="Logo"/>

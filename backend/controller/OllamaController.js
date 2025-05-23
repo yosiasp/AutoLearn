@@ -76,7 +76,7 @@ export const chatWithOllama = async (req, res) => {
 
         // Chat dengan Ollama
         const response = await ollama.chat({
-            model: 'ModelIndonesia', 
+            model: 'llama3.1', 
             messages: [{ role: 'user', content: prompt }]
         });
 
