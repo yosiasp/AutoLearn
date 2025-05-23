@@ -71,7 +71,9 @@ export const updateEmail = async (userData) => {
       method: 'PUT',
       headers: {
         'Content-Type' : 'application/json',
-      }
+      },
+      body: JSON.stringify(userData),
+      credentials: 'include',
     });
     return await response.json();
   } catch (error) {
@@ -82,7 +84,7 @@ export const updateEmail = async (userData) => {
 
 export const updatePassword = async (userData) => {
   try {
-    const response = await fetch(`${API_URL}/update/currentPassword`, {
+    const response = await fetch(`${API_URL}/update/password`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

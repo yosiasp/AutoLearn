@@ -138,7 +138,7 @@ const LoginForm = () => {
         <p className="signup-link">Don't have an account? <a href="#" onClick={() => navigate('/register')}>Create account</a></p>
       </div>
       {/* Info Section */}
-      <div className="info-section">
+      {/* <div className="info-section">
         <h3>Tentang AutoLearn</h3>
         <div className="info-grid">
           <div className="info-card">
@@ -154,7 +154,7 @@ const LoginForm = () => {
             <p>Pantau perkembangan belajar Anda dengan analisis detail dan rekomendasi</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

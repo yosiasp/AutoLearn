@@ -161,7 +161,7 @@
 }
 
 /* Info Section Styles */
-.info-section {
+/* .info-section {
   margin-top: 3rem;
   padding: 2rem;
   width: 100%;
@@ -207,10 +207,10 @@
   color: #b0b3c6;
   font-size: 0.9rem;
   line-height: 1.5;
-}
+} */
 
 /* Responsive design for info section */
-@media only screen and (max-width: 768px) {
+/* @media only screen and (max-width: 768px) {
   .info-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -228,4 +228,4 @@
   .info-section h3 {
     font-size: 1.5rem;
   }
-}
+} */

@@ -11,9 +11,7 @@ const Settings = () => {
   const user = JSON.parse(localStorage.getItem('user')) || {};
   const [name, setName] = useState(user.name || '');
   const [username, setUsername] = useState(user.username || '');
-  const [currentEmail, setCurrentEmail] = useState(user.email || '');
-  const [newEmail, setNewEmail] = useState('');
-  const [confirmEmail, setConfirmEmail] = useState('');
+  const [email, setEmail] = useState(user.email || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -80,7 +78,12 @@ const Settings = () => {
           pauseOnHover: true,
           draggable: true,
         });
-        localStorage.setItem('user', JSON.stringify(response.user));        
+        localStorage.setItem('user', JSON.stringify({
+          _id: response.user._id,          
+          name: response.user.name,
+          username: response.user.username,
+          email: response.user.email
+        }));         
       } else {
         setError(response.message || 'Update failed');
         toast.error(response.message || 'Update failed', {
@@ -101,39 +104,39 @@ const Settings = () => {
    const handleUpdateEmail = async (e) => {
     e.preventDefault();
     const id = user._id;
-
-    if (newEmail !== confirmEmail) {
-      toast.error("New email and confirmation email do not match", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
     try {
-      const response = await updateEmail({ id, newEmail });
+      const response = await updateEmail({ id, email });
 
       if (response.message === 'Email updated successfully') {
         toast.success('Email updated successfully', {
           position: "top-right",
           autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
         });
-
-        if (response.user) {
-          localStorage.setItem('user', JSON.stringify(response.user));
-          setCurrentEmail(response.user.email);
-          setNewEmail('');
-          setConfirmEmail('');
-        }
+        localStorage.setItem('user', JSON.stringify({
+          _id: response.user._id,          
+          name: response.user.name,
+          username: response.user.username,
+          email: response.user.email
+        }));    
       } else {
-        toast.error(response.message || 'Update failed');
+        toast.error(response.message || 'Update failed', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     } catch (err) {
       console.error(err);
       toast.error("An error occurred while updating the email");
     }
   };
-
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -155,16 +158,6 @@ const Settings = () => {
           pauseOnHover: true,
           draggable: true,
         });
-
-        // Update user data in localStorage
-        if (response.user) {
-          localStorage.setItem('user', JSON.stringify(response.user));
-        }
-
-        // Wait for toast to be visible before redirecting
-        setTimeout(() => {
-          handleReturnHome();
-        }, 1000);
       } else {
         setError(response.message || 'Update failed');
         toast.error(response.message || 'Update failed', {
@@ -211,16 +204,8 @@ const Settings = () => {
       <form className="form-settings" onSubmit={handleUpdateEmail}>
         <h2>Account Info</h2>
         <label>
-          Current Email:
-          <input type="email" value={currentEmail} disabled />
-        </label>
-        <label>
-          New Email:
-          <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required />
-        </label>
-        <label>
-          Confirm New Email:
-          <input type="email" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} required />
+          Email Address:
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}/>
         </label>
         <button type="submit">Update Email</button>
       </form>
