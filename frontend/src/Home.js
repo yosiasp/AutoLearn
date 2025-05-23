@@ -58,12 +58,19 @@ const Home = () => {
   };
 
   const handleNewChat = () => {
-    const newChatId = `chat_${Date.now()}`; // Generate a unique chatId
+    const newChatId = `chat_${Date.now()}_${user._id}`; // Generate a unique chatId with user ID
     setCurrentChatId(newChatId);
     setHistory([]);
     setMessage("");
     setFile(null);
     setFilePreview(null);
+    // Add the new chat to the chat list immediately
+    setChatList(prev => [{
+      _id: newChatId,
+      title: 'New Chat',
+      createdAt: new Date(),
+      lastMessage: ''
+    }, ...prev]);
   };
 
   const handleSelectChat = async (chatId) => {
@@ -130,7 +137,10 @@ const Home = () => {
         formData.append('file', file);
       }
       formData.append('message', message);
-      formData.append('chatId', currentChatId); // Include chatId in the request
+      
+      // Use existing chatId or generate new one
+      const chatIdToUse = currentChatId || `chat_${Date.now()}_${user._id}`;
+      formData.append('chatId', chatIdToUse);
 
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chat`, {
         method: "POST",
@@ -140,13 +150,29 @@ const Home = () => {
 
       const data = await res.json();
       
+      // Update currentChatId if it's a new chat
+      if (data.chatId && !currentChatId) {
+        setCurrentChatId(data.chatId);
+        // Update chat list with the new chat
+        setChatList(prev => [{
+          _id: data.chatId,
+          title: message.substring(0, 30) + (message.length > 30 ? '...' : ''),
+          createdAt: new Date(),
+          lastMessage: message
+        }, ...prev]);
+      } else {
+        // Update existing chat in the list
+        setChatList(prev => prev.map(chat => 
+          chat._id === currentChatId 
+            ? { ...chat, lastMessage: message }
+            : chat
+        ));
+      }
+      
       // Update the temporary message status and add AI response
       setHistory(prev => prev.map(msg => 
         msg === tempMessage ? { ...msg, status: 'sent' } : msg
       ).concat(data.aiResponse));
-
-      // Refresh chat list
-      await fetchChatList();
 
       setMessage("");
       setFile(null);
@@ -222,10 +248,10 @@ const Home = () => {
               onClick={() => handleSelectChat(chat._id)}
             >
               <div className="chat-item-title">
-                {chat.title || 'New Chat'}
+                {chat.title || chat.lastMessage || 'New Chat'}
               </div>
               <div className="chat-item-date">
-                {new Date(chat.createdAt).toLocaleDateString()}
+                {new Date(chat.createdAt).toLocaleDateString()} {new Date(chat.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           ))}

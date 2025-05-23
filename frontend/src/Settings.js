@@ -19,7 +19,7 @@ const Settings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('basic'); // default menu
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
   const dropdownRef = useRef(null);
 
   const handleReturnHome = async () => {

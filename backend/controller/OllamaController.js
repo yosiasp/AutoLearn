@@ -41,6 +41,9 @@ export const chatWithOllama = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Generate new chatId if not provided
+        const currentChatId = chatId || `chat_${Date.now()}_${userId}`;
+
         if (req.file) {
             console.log('File received:', req.file.originalname);
             console.log('File type:', req.file.mimetype);
@@ -97,7 +100,7 @@ export const chatWithOllama = async (req, res) => {
             message: message,
             response: formattedResponse,
             user: userId,
-            chatId: chatId,
+            chatId: currentChatId,
             fileData: fileData,
             fileName: fileName,
             fileType: fileType
@@ -114,6 +117,7 @@ export const chatWithOllama = async (req, res) => {
         }
 
         res.status(200).json({
+            chatId: currentChatId,
             userMessage: {
                 message: message,
                 timestamp: new Date(),
@@ -156,22 +160,18 @@ export const getOllamaHistory = async (req, res) => {
     if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
     try {
-        // Token check
         const tokenCheck = jwt.verify(token, KEY);
         
         const { userId } = req.params;
 
-        // Cek user
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
-        // Ambil history
+        
         const ollamaHistory = await Ollama.find({ user: userId })
-            .sort({ createdAt: 1 }); // Urutkan dari yang terlama ke terbaru
+            .sort({ createdAt: 1 });
 
-        // Format history untuk frontend
         const formattedHistory = ollamaHistory.flatMap(chat => [
             {
                 message: chat.message,
