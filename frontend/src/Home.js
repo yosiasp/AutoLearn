@@ -57,13 +57,26 @@ const Home = () => {
     }
   };
 
-  const handleNewChat = () => {
-    const newChatId = `chat_${Date.now()}`; // Generate a unique chatId
-    setCurrentChatId(newChatId);
-    setHistory([]);
-    setMessage("");
-    setFile(null);
-    setFilePreview(null);
+  const handleNewChat = async () => {
+    try {
+        const response = await fetch(`http://localhost:8000/api/${user._id}/ollama/chat/new`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        const data = await response.json();
+        if (response.ok) {
+            setCurrentChatId(data.chatId);
+            setHistory([]);
+            setMessage("");
+            setFile(null);
+            setFilePreview(null);
+            await fetchChatList();
+        } else {
+            console.error('Failed to create new chat:', data.error);
+        }
+    } catch (err) {
+        console.error('Error creating new chat:', err);
+    }
   };
 
   const handleSelectChat = async (chatId) => {

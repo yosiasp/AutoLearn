@@ -17,6 +17,22 @@ const __dirname = path.dirname(__filename);
 
 const KEY = process.env.JWT_KEY;
 
+export const createNewChat = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const newChat = new Ollama({
+            user: userId,
+            message: '',
+            response: '',
+            chatId: `chat_${Date.now()}`
+        });
+        await newChat.save();
+        res.status(201).json({ message: 'New chat created', chatId: newChat.chatId });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create new chat' });
+    }
+};
+
 export const chatWithOllama = async (req, res) => {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ error: 'Not authenticated' });
