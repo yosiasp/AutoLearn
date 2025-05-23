@@ -65,6 +65,21 @@ export const updateBasicInfo = async (userData) => {
   }
 };
 
+export const updateEmail = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/update/email`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type' : 'application/json',
+      }
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Update email error: ', error);
+    throw error
+  }
+};
+
 export const updatePassword = async (userData) => {
   try {
     const response = await fetch(`${API_URL}/update/currentPassword`, {

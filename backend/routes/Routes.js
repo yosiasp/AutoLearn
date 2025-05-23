@@ -1,6 +1,6 @@
 import express from "express";
 import { chatWithOllama, getOllamaHistory, getChatList, getChatHistory } from "../controller/OllamaController.js";
-import { registerUser, loginUser, logoutUser, checkToken, updateUser, deleteUser, forgotPassword, validateResetToken, resetPassword, updateBasicInfo, updatePassword } from "../controller/UserController.js";
+import { registerUser, loginUser, logoutUser, checkToken, updateUser, deleteUser, forgotPassword, validateResetToken, resetPassword, updateBasicInfo, updatePassword, updateEmail } from "../controller/UserController.js";
 import upload from "../config/multer.js";
 const router = express.Router();
 
@@ -9,7 +9,8 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.put('/update/basicInfo', updateBasicInfo);
-router.put('/update/currentPassword', updatePassword)
+router.put('/update/currentPassword', updatePassword);
+router.put('/update/currentEmail', updateEmail);
 router.put("/update/:userId", updateUser);
 router.delete("/delete/:userId", deleteUser);
 router.post("/checkToken", checkToken);

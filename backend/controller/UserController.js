@@ -149,6 +149,36 @@ export const updateBasicInfo = async (req, res) => {
   }
 };
 
+export const updateEmail = async (req, res) => {
+  try {
+    const { id, newEmail } = req.body;
+
+    if (!id || !newEmail) {
+      return res.status(400).json({ message: 'Credentials are not complete' });
+    }
+
+    const email = newEmail;
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { email },
+      { new: true } 
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      message: 'Email updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update email error:', error);
+    return res.status(500).json({ message: 'An error occurred while updating email' });
+  }
+};
+
+
 export const updatePassword = async (req, res) => {
   const { id, currentPassword, newPassword, confirmPassword } = req.body;
   console.log(req.body);

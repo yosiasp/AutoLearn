@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logout, updateBasicInfo, updatePassword } from './services/api';
+import { logout, updateBasicInfo, updatePassword, updateEmail } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import './Settings.css';
 
@@ -11,7 +11,9 @@ const Settings = () => {
   const user = JSON.parse(localStorage.getItem('user')) || {};
   const [name, setName] = useState(user.name || '');
   const [username, setUsername] = useState(user.username || '');
-  const [email, setEmail] = useState(user.email || '');
+  const [currentEmail, setCurrentEmail] = useState(user.email || '');
+  const [newEmail, setNewEmail] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -96,6 +98,43 @@ const Settings = () => {
     }
   };
 
+   const handleUpdateEmail = async (e) => {
+    e.preventDefault();
+    const id = user._id;
+
+    if (newEmail !== confirmEmail) {
+      toast.error("New email and confirmation email do not match", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    try {
+      const response = await updateEmail({ id, newEmail });
+
+      if (response.message === 'Email updated successfully') {
+        toast.success('Email updated successfully', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+          setCurrentEmail(response.user.email);
+          setNewEmail('');
+          setConfirmEmail('');
+        }
+      } else {
+        toast.error(response.message || 'Update failed');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while updating the email");
+    }
+  };
+
+
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     const id = user._id;
@@ -167,17 +206,26 @@ const Settings = () => {
           <button type="submit">Update Info</button>
         </form>
       );
-      case 'account':
-        return (
-          <form className="form-settings">
-            <h2>Account Info</h2>
-            <label>
-              Email:
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </label>
-            <button type="submit">Update Email</button>
-          </form>
-        );
+    case 'account':
+    return (
+      <form className="form-settings" onSubmit={handleUpdateEmail}>
+        <h2>Account Info</h2>
+        <label>
+          Current Email:
+          <input type="email" value={currentEmail} disabled />
+        </label>
+        <label>
+          New Email:
+          <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required />
+        </label>
+        <label>
+          Confirm New Email:
+          <input type="email" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} required />
+        </label>
+        <button type="submit">Update Email</button>
+      </form>
+    );
+
     case 'password':
       return (
         <form className="form-settings" onSubmit={handleUpdatePassword}>
