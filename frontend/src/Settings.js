@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logout, updateBasicInfo } from './services/api';
+import { logout, updateBasicInfo, updatePassword } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import './Settings.css';
 
@@ -48,8 +48,41 @@ const Settings = () => {
 
     try {
       const response = await updateBasicInfo({ id, name, username });
-      if (response.message === 'Basic info updated succesfully') {
-        toast.success('Basic info updated succesfully', {
+      if (response.message === 'Basic info updated successfully') {
+        toast.success('Basic info updated successfully', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        localStorage.setItem('user', JSON.stringify(response.user));        
+      } else {
+        setError(response.message || 'Update failed');
+        toast.error(response.message || 'Update failed', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while updating");
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    const id = user._id;
+
+    try {
+      const response = await updatePassword({ id, currentPassword, newPassword, confirmPassword });
+      if (response.message === 'Password updated successfully') {
+        toast.success('Password updated successfully', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -103,25 +136,28 @@ const Settings = () => {
             <button type="submit">Update Email</button>
           </form>
         );
-        case 'password':
-          return (
-            <form className="form-settings">
-              <h2>Account Info</h2>
-              <label>
-                Current Password:
-                <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-              </label>
-              <label>
-                New Password:
-                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-              </label>
-              <label>
-                Confirm Password:
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-              </label>
-              <button type="submit">Update</button>
-            </form>
-          );
+    case 'password':
+      return (
+        <form className="form-settings" onSubmit={handleUpdatePassword}>
+          <h2>Change Password</h2>
+          <label>
+            Current Password:
+            <input
+              type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+          </label>
+          <label>
+            New Password:
+            <input
+              type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+          </label>
+          <label>
+            Confirm Password:
+            <input
+              type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          </label>
+          <button type="submit">Update Password</button>
+        </form>
+      );
       case 'delete':
         return (
           <div className="form-settings">
