@@ -10,6 +10,32 @@ const RegisterForm = () => {
   // Title
   useEffect(() => {
     document.title = "Register";
+
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+    const email = params.get('email');
+
+    if (name || email) {
+      setForm((prev) => ({
+        ...prev,
+        name: name || '',
+        email: email || '',
+      }));
+      setGoogleLoginUsed(true); 
+    }
+
+    // Checking for google authentication error parameter
+    const error = params.get("error");
+    if (error === "google_auth_failed") {
+      toast.error("Google authentication failed. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   }, []);
 
   const navigate = useNavigate();
@@ -36,6 +62,7 @@ const RegisterForm = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [googleLoginUsed, setGoogleLoginUsed] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -106,14 +133,22 @@ const RegisterForm = () => {
       <div className="register-card">
         <h2>Create your account</h2>
         <p>Join Autolearn and start chatting with our AI assistant</p>
-        <div className="login-method-icon">
-          <div className="google-icon-wrapper">
-            <img src="/google-icon.png" alt="Google Login" />
-          </div>
-        </div>
-        <div className="separator">
-          <span>or</span>
-        </div>
+        {!googleLoginUsed && (
+          <>
+            <div className="login-method-icon">
+              <div
+                className="google-icon-wrapper"
+                onClick={() => window.location.href = 'http://localhost:8000/auth/google'}
+                style={{ cursor: 'pointer' }}
+              >
+                <img src="/google-icon.png" alt="Google Login" />
+              </div>
+            </div>
+            <div className="separator">
+              <span>or</span>
+            </div>
+          </>
+        )}
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Full Name</label>

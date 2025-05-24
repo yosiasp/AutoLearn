@@ -1,7 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes.js";
 import Routes from "./routes/Routes.js";
+import "./config/passport.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -31,6 +33,7 @@ mongoose.connect(MONGOURL).then(() => {
 });
 
 app.use("/api/", Routes);
+app.use(authRoutes);
 
 export default app;
 
