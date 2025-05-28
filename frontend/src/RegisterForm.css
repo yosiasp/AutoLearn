@@ -194,6 +194,32 @@
   flex: 1;
 }
 
+.password-validation-message {
+  margin-top: -6px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: #e53935; 
+  padding-left: 2px;
+}
+
+.password-validation-message.valid {
+  color: #43a047; 
+}
+
+.password-validation-message.valid::before {
+  content: '✔'; 
+  font-weight: bold;
+  font-size: 1rem;
+  color: #2ecc71;
+}
+
+.password-validation-message::before {
+  content: '✖'; 
+  font-weight: bold;
+  font-size: 1rem;
+  color: #e74c3c;
+}
+
 .signin-link {
   text-align: center;
   margin-top: 1rem;

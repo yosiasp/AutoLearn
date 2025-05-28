@@ -131,16 +131,21 @@ const RegisterForm = () => {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (form.email.trim()) {
-        checkEmail(form.email.trim()).then(data => {
-          console.log('Username availability:', data);
+      const trimmedEmail = form.email.trim();
+
+      // Email check
+      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+
+      if (trimmedEmail && isValidEmail) {
+        checkEmail(trimmedEmail).then(data => {
           setEmailAvailable(data.available);
         });
       }
     }, 500);
+
     return () => clearTimeout(delayDebounceFn);
   }, [form.email]);
-
+  
   // Password validation
   const validatePassword = (password) => {
     if (password.length < 8) return "Password must be at least 8 characters";
@@ -148,7 +153,7 @@ const RegisterForm = () => {
     if (!/[A-Z]/.test(password)) return "Include at least one uppercase letter";
     if (!/[a-z]/.test(password)) return "Include at least one lowercase letter";
     if (!/[\d\W_]/.test(password)) return "Include a number or special character";
-    return "Password is valid";
+    return "";
   };
 
     useEffect(() => {
@@ -234,8 +239,10 @@ const RegisterForm = () => {
               required
             />
           </div>
-          {form.password && passwordMessage && (
-            <div className="password-validation-message">{passwordMessage}</div>
+          {form.password && (
+            <div className={`password-validation-message ${!passwordMessage ? 'valid' : 'invalid'}`}>
+              {passwordMessage || 'Password is valid'}
+            </div>
           )}
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Loading...' : 'Create Account'}
