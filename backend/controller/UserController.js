@@ -10,6 +10,26 @@ dotenv.config();
 export const registerUser = async (req, res) => {
   try {
     const { name, username, email, password, confirmPassword } = req.body;
+
+    // Password validation
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long" });
+    }
+
+    if (/\s/.test(password)) {
+      return res.status(400).json({ message: "Password must not contain spaces" });
+    }
+
+    const upperCase = /[A-Z]/;
+    const lowerCase = /[a-z]/;
+
+    if (!upperCase.test(password)) {
+      return res.status(400).json({ message: "Password must contain at least one uppercase letter" });
+    }
+    if (!lowerCase.test(password)) {
+      return res.status(400).json({ message: "Password must contain at least one lowercase letter" });
+    }
+
     const userWithEmail = await User.findOne({ email });
     if (userWithEmail) {
         return res.status(400).json({ message: "Email already used" });

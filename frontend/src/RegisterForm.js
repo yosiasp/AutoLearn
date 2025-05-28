@@ -54,6 +54,9 @@ const RegisterForm = () => {
 
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [emailAvailable, setEmailAvailable] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState('');
   const [form, setForm] = useState({
     name: '',
     username: '',
@@ -138,6 +141,26 @@ const RegisterForm = () => {
     return () => clearTimeout(delayDebounceFn);
   }, [form.email]);
 
+  // Password validation
+  const validatePassword = (password) => {
+    if (password.length < 8) return "Password must be at least 8 characters";
+    if (/\s/.test(password)) return "Password must not contain spaces";
+    if (!/[A-Z]/.test(password)) return "Include at least one uppercase letter";
+    if (!/[a-z]/.test(password)) return "Include at least one lowercase letter";
+    if (!/[\d\W_]/.test(password)) return "Include a number or special character";
+    return "Password is valid";
+  };
+
+    useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (form.password.trim()) {
+        const message = validatePassword(form.password);
+        setPasswordMessage(message);
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [form.password]);
+
   return (
     <div className="register-container">
       <ToastContainer />
@@ -211,7 +234,9 @@ const RegisterForm = () => {
               required
             />
           </div>
-
+          {form.password && passwordMessage && (
+            <div className="password-validation-message">{passwordMessage}</div>
+          )}
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Loading...' : 'Create Account'}
           </button>
