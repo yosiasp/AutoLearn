@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './RegisterForm.css';
-import { register } from './services/api';
+import { register, checkUsername, checkEmail } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
@@ -52,7 +52,8 @@ const RegisterForm = () => {
     verifyLogin();
   }, );
 
-
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
+  const [emailAvailable, setEmailAvailable] = useState(null);
   const [form, setForm] = useState({
     name: '',
     username: '',
@@ -114,6 +115,29 @@ const RegisterForm = () => {
     }
   };
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (form.username.trim()) {
+        checkUsername(form.username.trim()).then(data => {
+          setUsernameAvailable(data.available);
+        });
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [form.username]);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (form.email.trim()) {
+        checkEmail(form.email.trim()).then(data => {
+          console.log('Username availability:', data);
+          setEmailAvailable(data.available);
+        });
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [form.email]);
+
   return (
     <div className="register-container">
       <ToastContainer />
@@ -155,8 +179,18 @@ const RegisterForm = () => {
           <input name="name" type="text" placeholder="Enter your full name" value={form.name} onChange={handleChange} required />
           <label>Username</label>
           <input name="username" type="text" placeholder="Enter your desired username" value={form.username} onChange={handleChange} required />
+          {form.username && usernameAvailable !== null && (
+            <div className={usernameAvailable ? 'valid' : 'invalid'}>
+              {usernameAvailable ? ' Username available' : ' Username already used'}
+            </div>
+          )}
           <label>Email Address</label>
           <input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} required />
+          {form.email && emailAvailable !== null && (
+            <div className={emailAvailable ? 'valid' : 'invalid'}>
+              {emailAvailable ? ' Email available' : ' Email already used'}
+            </div>
+          )}
           <label>Password</label>
           <label style={{ display: 'none' }}>Confirm Password</label>
           <div className="password-row">

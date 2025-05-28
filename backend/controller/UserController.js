@@ -30,6 +30,43 @@ export const registerUser = async (req, res) => {
   }
 };
 
+export const checkUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username) return res.status(400).json({ available: false, message: 'Username is required' });
+
+    const existingUser = await User.findOne({ username }); 
+
+    return res.status(200).json({
+      available: !existingUser,
+      message: existingUser ? 'Username already taken' : 'Username is available',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ available: false, message: 'Server error' });
+  }
+};
+
+export const checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ available: false, message: 'Email is required' });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    return res.status(200).json({
+      available: !existingUser,
+      message: existingUser ? 'Email already taken' : 'Email is available',
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ available: false, message: 'Server error' });
+  }
+};
+
 const KEY = process.env.JWT_KEY;
 
 export const loginUser = async (req, res) => {

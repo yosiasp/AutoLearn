@@ -169,3 +169,37 @@ export const resetPassword = async (password, confirmPassword, token) => {
   }
 };
 
+export const checkEmail = async (email) => {
+  try {
+    const response = await fetch(`${API_URL}/checkEmail`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error checking email:', err);
+    return { available: false, message: 'Unable to check email availability' };
+  }
+};
+
+export const checkUsername = async (username) => {
+  try {
+    const response = await fetch(`${API_URL}/checkUsername`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username }),
+    });
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error checking username:', err);
+    return { available: false, message: 'Unable to check username availability' };
+  }
+};
+
