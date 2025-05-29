@@ -100,6 +100,7 @@ export const chatWithOllama = async (req, res) => {
             message: message,
             response: formattedResponse,
             user: userId,
+            username: user.username,
             chatId: currentChatId,
             fileData: fileData,
             fileName: fileName,
@@ -218,9 +219,9 @@ export const getChatList = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Ambil daftar chat
+        // Ambil daftar chat berdasarkan username
         const chats = await Ollama.aggregate([
-            { $match: { user: mongoose.Types.ObjectId(userId) } },
+            { $match: { username: user.username } },
             { $sort: { createdAt: -1 } },
             { $group: {
                 _id: "$chatId",
@@ -258,9 +259,9 @@ export const getChatHistory = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Ambil history chat
+        // Ambil history chat berdasarkan username dan chatId
         const chatHistory = await Ollama.find({ 
-            user: userId,
+            username: user.username,
             chatId: chatId 
         }).sort({ createdAt: 1 });
 
