@@ -9,6 +9,8 @@ import mammoth from 'mammoth';
 import { fileURLToPath } from 'url';
 import pdf from 'pdf-parse';
 import mongoose from 'mongoose';
+import axios from 'axios';
+import FormData from 'form-data';
 
 dotenv.config();
 
@@ -44,57 +46,65 @@ export const chatWithOllama = async (req, res) => {
         // Generate new chatId if not provided
         const currentChatId = chatId || `chat_${Date.now()}_${userId}`;
 
-        if (req.file) {
-            console.log('File received:', req.file.originalname);
-            console.log('File type:', req.file.mimetype);
-            fileName = req.file.originalname;
-            fileType = req.file.mimetype;
+        // WITHOUT RAG START
+    
+        // if (req.file) {
+        //     console.log('File received:', req.file.originalname);
+        //     console.log('File type:', req.file.mimetype);
+        //     fileName = req.file.originalname;
+        //     fileType = req.file.mimetype;
             
-            if (fileType.startsWith('text/') || 
-                fileType === 'application/json' || 
-                fileType === 'application/xml' ||
-                fileType === 'application/javascript') {
+        //     if (fileType.startsWith('text/') || 
+        //         fileType === 'application/json' || 
+        //         fileType === 'application/xml' ||
+        //         fileType === 'application/javascript') {
                 
-                fileData = fs.readFileSync(req.file.path, 'utf8');
+        //         fileData = fs.readFileSync(req.file.path, 'utf8');
                 
-                prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
-            } else if (fileType.startsWith('image/')) {
-                fileData = req.file.path;
-                prompt = `[Image attached: ${fileName}]\n\nUser question: ${message}`;
-            } else if (fileType === 'application/pdf') {
-                const dataBuffer = fs.readFileSync(req.file.path);
-                const pdfData = await pdf(dataBuffer);
-                fileData = pdfData.text;
-                prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
-            } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                const dataBuffer = fs.readFileSync(req.file.path);
-                const result = await mammoth.extractRawText({ buffer: dataBuffer });
-                fileData = result.value;
-                prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
-            } else {
-                fileData = req.file.path;
-                prompt = `[File attached: ${fileName}]\n\nUser question: ${message}`;
-            }
-        }
-
-        // Chat dengan Ollama
-        const response = await ollama.chat({
-            model: 'llama3.1', 
-            messages: [{ role: 'user', content: prompt }]
-        });
+        //         prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
+        //     } else if (fileType.startsWith('image/')) {
+        //         fileData = req.file.path;
+        //         prompt = `[Image attached: ${fileName}]\n\nUser question: ${message}`;
+        //     } else if (fileType === 'application/pdf') {
+        //         const dataBuffer = fs.readFileSync(req.file.path);
+        //         const pdfData = await pdf(dataBuffer);
+        //         fileData = pdfData.text;
+        //         prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
+        //     } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        //         const dataBuffer = fs.readFileSync(req.file.path);
+        //         const result = await mammoth.extractRawText({ buffer: dataBuffer });
+        //         fileData = result.value;
+        //         prompt = `File: ${fileName}\n\nContent:\n${fileData}\n\nUser question: ${message}`;
+        //     } else {
+        //         fileData = req.file.path;
+        //         prompt = `[File attached: ${fileName}]\n\nUser question: ${message}`;
+        //     }
+        // }
 
         // Format the response with bold text and better styling
-        let formattedResponse = response.message.content;
-        
-        // Add bold formatting to important points
-        formattedResponse = formattedResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Add bullet points for lists
-        formattedResponse = formattedResponse.replace(/^\s*-\s*(.*)$/gm, '• $1');
-        
-        // Add line breaks for better readability
-        formattedResponse = formattedResponse.replace(/\n/g, '<br>');
+        // let formattedResponse = response.message.content;
 
+        // WITHOUT RAG END
+
+        // USING RAG START
+
+        const form = new FormData();
+        form.append('prompt', prompt);
+        if (req.file) {
+            form.append('file', fs.createReadStream(req.file.path), req.file.originalname);
+        }
+
+        const ragResponse = await axios.post('http://localhost:8001/rag/query', form, {
+            headers: form.getHeaders()
+        });
+
+        const formattedResponse = ragResponse.data.response
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^\s*-\s*(.*)$/gm, '• $1')
+            .replace(/\n/g, '<br>');
+
+        // USING RAG END
+        
         // Simpan ke database
         const ollamaResponse = new Ollama({
             message: message,
@@ -220,7 +230,7 @@ export const getChatList = async (req, res) => {
 
         // Ambil daftar chat
         const chats = await Ollama.aggregate([
-            { $match: { user: mongoose.Types.ObjectId(userId) } },
+            { $match: { user: new mongoose.Types.ObjectId(userId) } },
             { $sort: { createdAt: -1 } },
             { $group: {
                 _id: "$chatId",
