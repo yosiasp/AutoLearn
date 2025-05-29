@@ -18,11 +18,19 @@ const Home = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Fetch chat list saat komponen dimuat
   useEffect(() => {
     if (user._id) {
       fetchChatList();
     }
   }, [user._id]);
+
+  // Fetch history saat chatId berubah
+  useEffect(() => {
+    if (currentChatId) {
+      fetchHistory(currentChatId);
+    }
+  }, [currentChatId]);
 
   const fetchChatList = async () => {
     try {
@@ -31,6 +39,11 @@ const Home = () => {
       });
       const data = await res.json();
       setChatList(Array.isArray(data) ? data : []);
+      
+      // Jika ada chat, pilih chat terbaru
+      if (data && data.length > 0 && !currentChatId) {
+        setCurrentChatId(data[0]._id);
+      }
     } catch (err) {
       console.error('Error fetching chat list:', err);
       setChatList([]);
@@ -58,7 +71,7 @@ const Home = () => {
   };
 
   const handleNewChat = () => {
-    const newChatId = `chat_${Date.now()}_${user._id}`; // Generate a unique chatId with user ID
+    const newChatId = `chat_${Date.now()}_${user._id}`;
     setCurrentChatId(newChatId);
     setHistory([]);
     setMessage("");

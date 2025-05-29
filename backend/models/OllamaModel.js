@@ -14,9 +14,13 @@ const ollamaSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    username: {
+        type: String,
+        required: true
+    },
     chatId: {
         type: String,
-        required: false
+        required: true
     },
     fileData: {
         type: String,
@@ -31,5 +35,9 @@ const ollamaSchema = new mongoose.Schema({
         required: false
     }
 }, { timestamps: true });
+
+// Index untuk mempercepat pencarian
+ollamaSchema.index({ user: 1, chatId: 1 });
+ollamaSchema.index({ username: 1, chatId: 1 });
 
 export default mongoose.model('Ollama', ollamaSchema);
