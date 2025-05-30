@@ -9,6 +9,7 @@ from typing import Optional
 from fastapi import FastAPI, UploadFile, File, Form
 import uvicorn
 from rag import process_rag_query
+import json
 
 app = FastAPI()
 
@@ -19,9 +20,12 @@ async def health():
 @app.post("/rag/query")
 async def rag_query(
     prompt: str = Form(...),
+    chat_history: str = Form(...),
     file: Optional[UploadFile] = File(None)
 ):
-    response = await process_rag_query(prompt, file)
+    # Parse string JSON 
+    chat_history = await json.loads(chat_history)
+    response = await process_rag_query(chat_history, prompt, file)
     return {"response": response}
 
 if __name__ == "__main__":

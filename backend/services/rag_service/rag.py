@@ -11,6 +11,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.llms import Ollama
 from langchain.chains import RetrievalQA
 from utils import read_uploaded_file
+from typing import List, Dict, Optional
 
 import tempfile
 import os
@@ -47,9 +48,20 @@ import os
 #     finally:
 #         os.remove(tmp_path)
 
-async def process_rag_query(prompt, file):
+async def process_rag_query(
+    chat_history: List[Dict[str, str]],
+    prompt: str,
+    file: Optional[object] = None
+) -> str:
     tmp_path = None
     try:
+        # Full prompt combined with chat history
+        full_prompt = ""
+        for msg in chat_history:
+            role = "User" if msg["role"] == "user" else "AI"
+            full_prompt += f"{role}: {msg['content']}\n"
+        full_prompt += f"User: {prompt}\nai:"
+
         if file:
             with tempfile.NamedTemporaryFile(delete=False, suffix=file.filename) as tmp:
                 tmp.write(await file.read())
@@ -70,11 +82,10 @@ async def process_rag_query(prompt, file):
                 retriever=retriever,
                 return_source_documents=False
             )
-            result = qa.run(prompt)
+            result = qa.run(full_prompt)
         else:
-            # Tidak ada file, langsung panggil LLM tanpa retriever
             llm = Ollama(model="llama3.1")
-            result = llm(prompt)
+            result = llm(full_prompt)
 
         return result
     finally:

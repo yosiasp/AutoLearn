@@ -43,8 +43,33 @@ export const chatWithOllama = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (!prompt) {
+            return res.status(400).json({ message: "Prompt is required" });
+        }
+
         // Generate new chatId if not provided
         const currentChatId = chatId || `chat_${Date.now()}_${userId}`;
+
+        // Getting chat history by chatId
+        const previousChats = await Ollama.find({
+            username: user.username,
+            chatId: currentChatId
+        }).sort({ createdAt: 1 });
+
+        // Chat history formatting
+        const chat_history = previousChats.flatMap(chat => {
+            const items = [];
+            if (chat.message) {
+                items.push({ role: "user", content: chat.message });
+            }
+            if (chat.response) {
+                items.push({ role: "ai", content: chat.response });
+            }
+            return items;
+        });
+
+        const form = new FormData();
+        form.append('chat_history', await JSON.stringify(chat_history));
 
         // WITHOUT RAG START
     
@@ -88,7 +113,6 @@ export const chatWithOllama = async (req, res) => {
 
         // USING RAG START
 
-        const form = new FormData();
         form.append('prompt', prompt);
         if (req.file) {
             form.append('file', fs.createReadStream(req.file.path), req.file.originalname);
@@ -98,12 +122,12 @@ export const chatWithOllama = async (req, res) => {
             headers: form.getHeaders()
         });
 
+        // USING RAG END
+
         const formattedResponse = ragResponse.data.response
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/^\s*-\s*(.*)$/gm, '• $1')
             .replace(/\n/g, '<br>');
-
-        // USING RAG END
         
         // Simpan ke database
         const ollamaResponse = new Ollama({
