@@ -23,8 +23,8 @@ async def rag_query(
     chat_history: str = Form(...),
     file: Optional[UploadFile] = File(None)
 ):
-    # Parse string JSON 
-    chat_history = await json.loads(chat_history)
+    # Parsing string JSON 
+    chat_history = json.loads(chat_history)
     response = await process_rag_query(chat_history, prompt, file)
     return {"response": response}
 

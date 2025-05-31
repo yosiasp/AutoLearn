@@ -69,7 +69,7 @@ export const chatWithOllama = async (req, res) => {
         });
 
         const form = new FormData();
-        form.append('chat_history', await JSON.stringify(chat_history));
+        form.append('chat_history', JSON.stringify(chat_history));
 
         // WITHOUT RAG START
     

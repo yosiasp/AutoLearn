@@ -16,38 +16,6 @@ from typing import List, Dict, Optional
 import tempfile
 import os
 
-# async def process_rag_query(prompt, file):
-#     # Save file temporarily
-#     with tempfile.NamedTemporaryFile(delete=False, suffix=file.filename) as tmp:
-#         tmp.write(await file.read())
-#         tmp_path = tmp.name
-
-#     try:
-#         # Step 1: Read file text
-#         file_text = read_uploaded_file(tmp_path)
-
-#         # Step 2: Split into chunks
-#         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-#         chunks = splitter.split_text(file_text)
-
-#         # Step 3: Create vector store
-#         embeddings = OllamaEmbeddings(model="nomic-embed-text")
-#         vector_store = FAISS.from_texts(chunks, embeddings)
-
-#         # Step 4: RAG QA chain
-#         retriever = vector_store.as_retriever()
-#         qa = RetrievalQA.from_chain_type(
-#             llm=Ollama(model="llama3.1"),
-#             retriever=retriever,
-#             return_source_documents=False
-#         )
-
-#         final_prompt = f"{prompt}"
-#         result = qa.run(final_prompt)
-#         return result
-#     finally:
-#         os.remove(tmp_path)
-
 async def process_rag_query(
     chat_history: List[Dict[str, str]],
     prompt: str,
