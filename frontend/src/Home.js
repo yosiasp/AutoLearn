@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logout } from './services/api';
+import { logout, deleteChat } from './services/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './Home.css';
 
 const Home = () => {
@@ -248,9 +250,10 @@ const Home = () => {
 
   return (
     <div className="home-root">
+      <ToastContainer />
       <aside className="sidebar">
         <div className="logo">
-          <img src="/logo.png" alt="Logo"/>
+          <img src="/logo.png" alt="Logo" />
         </div>
         <button className="new-chat-btn" onClick={handleNewChat}>New Chat</button>
         <div className="chat-list">
@@ -258,18 +261,61 @@ const Home = () => {
             <div 
               key={chat._id} 
               className={`chat-item ${currentChatId === chat._id ? 'active' : ''}`}
-              onClick={() => handleSelectChat(chat._id)}
             >
-              <div className="chat-item-title">
-                {chat.title || chat.lastMessage || 'New Chat'}
+              <div 
+                className="chat-item-content"
+                onClick={() => handleSelectChat(chat._id)}
+                style={{ flex: 1, cursor: 'pointer' }}
+              >
+                <div className="chat-item-title">
+                  {chat.title || chat.lastMessage || 'New Chat'}
+                </div>
+                <div className="chat-item-date">
+                  {new Date(chat.createdAt).toLocaleDateString()}{" "}
+                  {new Date(chat.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
               </div>
-              <div className="chat-item-date">
-                {new Date(chat.createdAt).toLocaleDateString()} {new Date(chat.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          ))}
+         <button 
+            className="delete-btn" 
+            onClick={async (e) => {
+              e.stopPropagation(); 
+              try {
+                await deleteChat({ userId: user._id, chatId: chat._id });
+
+                // UI update
+                setChatList(prev => prev.filter(c => c._id !== chat._id));
+                if (currentChatId === chat._id) {
+                  setCurrentChatId(null);
+                }
+
+                console.log("TOAST SUKSES HARUSNYA MUNCUL DI SINI");
+                toast.success('Chat Deleted Successfully', {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                });
+              } catch (err) {
+                const errorMessage = err?.message;
+                toast.error(errorMessage || 'An error has occured', {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                });
+              }
+            }}
+          >
+            🗑️
+          </button>
         </div>
-      </aside>
+      ))}
+    </div>
+  </aside>
       <main className="main-chat">
         <header className="chat-header">
           <span>Current Chat</span>

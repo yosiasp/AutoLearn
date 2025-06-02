@@ -203,3 +203,29 @@ export const checkUsername = async (username) => {
   }
 };
 
+export const deleteChat = async ({ userId, chatId }) => {
+  try {
+    const response = await fetch(`${API_URL}/ollama/deleteChat`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, chatId }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Gagal menghapus chat');
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Delete chat error:', error);
+    throw error;
+  }
+};
+
+
+
