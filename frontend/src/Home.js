@@ -79,13 +79,15 @@ const Home = () => {
     setMessage("");
     setFile(null);
     setFilePreview(null);
-    // Add the new chat to the chat list immediately
-    setChatList(prev => [{
-      _id: newChatId,
-      title: 'New Chat',
-      createdAt: new Date(),
-      lastMessage: ''
-    }, ...prev]);
+    // Adding new chat on the list only if the current chat is not empty (avoiding repetitive new empty chat)
+    if (history.length !== 0){
+      setChatList(prev => [{
+        _id: newChatId,
+        title: 'New Chat',
+        createdAt: new Date(),
+        lastMessage: ''
+      }, ...prev]);
+    }
   };
 
   const handleSelectChat = async (chatId) => {
