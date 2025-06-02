@@ -9,6 +9,17 @@ import ResetPasswordForm from '../ResetPasswordForm';
 import Home from '../Home';
 import Settings from '../Settings';
 import Overview from '../Overview';
+import AdminLogin from '../AdminLogin';
+import Dashboard from '../Dashboard';
+
+// Protected Route untuk Admin
+const ProtectedAdminRoute = ({ children }) => {
+  const admin = localStorage.getItem('admin');
+  if (!admin) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  return children;
+};
 
 const AppRoutes = () => {
   return (
@@ -39,6 +50,17 @@ const AppRoutes = () => {
               <ResetPasswordForm />
             </ProtectedResetRoute>
           } />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <Dashboard />
+            </ProtectedAdminRoute>
+          }
+        />
       </Routes>
     </Router>
   );

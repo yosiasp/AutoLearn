@@ -12,15 +12,21 @@ import axios from "axios";
 dotenv.config();
 
 const app = express();
+
+// Cookie parser middleware
 app.use(cookieParser());
 
-// Enable CORS for frontend
+// CORS configuration
 app.use(cors({
     origin: 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Body parser middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 8000;
 const MONGOURL = process.env.MONGOURL;
@@ -63,27 +69,39 @@ async function waitForPythonReady(url, interval = 1000, maxRetries = 30) {
     throw new Error('Python server did not start in time.');
 }
 
-mongoose.connect(MONGOURL).then(async () => {
-    console.log("Connected to MongoDB");
+// Connect to MongoDB and start servers
+mongoose.connect(MONGOURL)
+    .then(async () => {
+        console.log("Connected to MongoDB");
 
-    startPythonServer();
+        // Start Python server
+        startPythonServer();
 
-    try {
-        await waitForPythonReady('http://localhost:8001/health');
-  
-        app.listen(PORT, () => {
-            console.log(`Node Js Server is running on port ${PORT}`);
-        });
-    } catch (err) {
-        console.error(err.message);
-        process.exit(1); 
-    }
+        try {
+            await waitForPythonReady('http://localhost:8001/health');
+            
+            // Start Express server
+            app.listen(PORT, () => {
+                console.log(`Node Js Server is running on port ${PORT}`);
+            });
+        } catch (err) {
+            console.error(err.message);
+            process.exit(1);
+        }
+    })
+    .catch((err) => {
+        console.error("MongoDB connection error:", err);
+        process.exit(1);
+    });
 
-}).catch((err) => {
-    console.log(err);
-});
-
-app.use("/api/", Routes);
+// Routes
+app.use("/api", Routes);
 app.use(authRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
+});
 
 export default app;

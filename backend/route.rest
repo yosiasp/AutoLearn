@@ -1,0 +1,19 @@
+POST http://localhost:8000/api/admin/login
+Content-Type: application/json
+
+{
+    "username": "superadmin",
+    "password": "admin123"
+}
+###
+POST http://localhost:8000/api/register
+Content-Type: application/json
+
+{
+    "username": "yosiaaasp",
+    "password": "Yosia2411",
+    "email": "yosiaaasp@gmail.com"
+}
+###
+POST http://localhost:8000/api/admin/logout
+

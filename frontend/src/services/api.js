@@ -227,5 +227,68 @@ export const deleteChat = async ({ userId, chatId }) => {
   }
 };
 
+export const loginAdmin = async (credentials) => {
+  try {
+    if (!credentials.username || !credentials.password) {
+      throw new Error('Username and password are required');
+    }
 
+    const response = await fetch(`${API_URL}/admin/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+      credentials: 'include',
+    });
 
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Admin login error:', error);
+    throw error;
+  }
+};
+
+export const logoutAdmin = async () => {
+  try {
+    const response = await fetch(`${API_URL}/admin/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Logout failed');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Admin logout error:', error);
+    throw error;
+  }
+};
+
+export const checkAdminToken = async () => {
+  try {
+    const response = await fetch(`${API_URL}/admin/checkToken`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Not authenticated');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Admin token check error:', error);
+    throw error;
+  }
+};

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "concurrently \"npm:dev-node\" \"npm:dev-python\"",
     "dev-node": "nodemon index.js",
-    "dev-python": "pushd services/rag_service && ..\\..\\.venv\\Scripts\\uvicorn main:app --port 8001 --reload && popd"
+    "dev-python": "pushd services/rag_service && ..\\..\\.venv\\Scripts\\python.exe -m uvicorn main:app --port 8001 --reload",
+    "start": "node server.js",
+    "create-admin": "node scripts/createFirstAdmin.js"
   },
   "keywords": [],
   "author": "",

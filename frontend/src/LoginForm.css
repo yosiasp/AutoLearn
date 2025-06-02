@@ -153,6 +153,19 @@
   font-size: 14px;
 }
 
+.admin-login-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #b0b3c6;
+}
+
+.admin-login-link a {
+  color: #5a2de0;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
 /* Adjustments for smartphone */
 @media only screen and (max-width: 600px) {
   .login-card {

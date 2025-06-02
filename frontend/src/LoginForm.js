@@ -136,6 +136,7 @@ const LoginForm = () => {
           </button>
         </form>
         <p className="signup-link">Don't have an account? <a href="#" onClick={() => navigate('/register')}>Create account</a></p>
+        <p className="admin-login-link">Are You an Admin? <a href="#" onClick={() => navigate('/admin/login')}>Admin Login</a></p>
       </div>
       {/* Info Section */}
       {/* <div className="info-section">
