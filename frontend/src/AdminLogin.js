@@ -92,7 +92,6 @@ const AdminLogin = () => {
       <div className="admin-login-card">
         <h2>Admin Portal</h2>
         <p>Sign in to access admin dashboard</p>
-        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Username</label>
           <input 

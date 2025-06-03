@@ -122,7 +122,6 @@ const LoginForm = () => {
       <div className="login-card">
         <h2>Welcome</h2>
         <p>Sign in to your account to continue</p>
-        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Username or Email address</label>
           <input name="emailOrUsername" type="text" placeholder="Enter your username or email" value={form.emailOrUsername} onChange={handleChange} required />

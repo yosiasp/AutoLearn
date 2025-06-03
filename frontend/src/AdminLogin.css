@@ -128,16 +128,6 @@
   color: #ffcccc;
 }
 
-.error-message {
-  color: #ff4d4f;
-  background-color: rgba(255, 77, 79, 0.1);
-  border: 1px solid rgba(255, 77, 79, 0.2);
-  padding: 8px 15px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
 /* Adjustments for smartphone */
 @media only screen and (max-width: 600px) {
   .admin-login-card {

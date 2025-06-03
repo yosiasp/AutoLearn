@@ -106,7 +106,6 @@ const ForgotForm = () => {
       <div className="forgot-card">
         <h2>Forgot Password</h2>
         <p>Enter your email password to reset your password</p>
-        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Email address</label>
           <input name="email" type="email" placeholder="Enter your email" value={form.email} onChange={handleChange} required />

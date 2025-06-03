@@ -201,7 +201,6 @@ const RegisterForm = () => {
             </div>
           </>
         )}
-        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <label>Full Name</label>
           <input name="name" type="text" placeholder="Enter your full name" value={form.name} onChange={handleChange} required />

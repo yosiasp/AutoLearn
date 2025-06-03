@@ -143,16 +143,6 @@
   font-size: 0.8rem;
 }
 
-.error-message {
-  color: #ff4d4f;
-  background-color: #fff2f0;
-  border: 1px solid #ffccc7;
-  padding: 8px 15px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
 .admin-login-link {
   text-align: center;
   margin-top: 1rem;

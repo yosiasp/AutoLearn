@@ -102,16 +102,6 @@
   height: 55px;
 }
 
-.error-message {
-  color: #ff4d4f;
-  background-color: #fff2f0;
-  border: 1px solid #ffccc7;
-  padding: 8px 15px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
 /* Adjustments for smartphone */
 @media only screen and (max-width: 600px) {
   .forgot-card {
