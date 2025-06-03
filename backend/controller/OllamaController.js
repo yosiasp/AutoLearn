@@ -356,3 +356,26 @@ export const deleteChat = async (req, res) => {
     return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const getAllChats = async (req, res) => {
+  try {
+    const chats = await Ollama.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $group: {
+        _id: "$chatId",
+        username: { $first: "$username" },
+        lastMessage: { $first: "$message" },
+        createdAt: { $first: "$createdAt" }
+      }},
+      { $sort: { createdAt: -1 } }
+    ]);
+
+    res.status(200).json({ 
+      message: "Chats fetched successfully",
+      chats 
+    });
+  } catch (error) {
+    console.error('Get chats error:', error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

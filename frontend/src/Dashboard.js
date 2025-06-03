@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { checkAdminToken, logoutAdmin, createAdmin } from './services/api';
+import AddAdminPopup from './components/AddAdminPopup';
+import StatsPopup from './components/StatsPopup';
 import './Dashboard.css';
 
 const API_URL = 'http://localhost:8000/api';
@@ -9,18 +11,18 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [adminData, setAdminData] = useState(null);
   const [admins, setAdmins] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isStatsPopupOpen, setIsStatsPopupOpen] = useState(false);
+  const [statsType, setStatsType] = useState(null);
 
   const checkAuth = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/admin/checkToken`, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      setAdminData(response.data.admin);
+      const response = await checkAdminToken();
+      setAdminData(response.admin);
       setError(null);
     } catch (error) {
       setError('Authentication failed. Please login again.');
@@ -31,46 +33,150 @@ const Dashboard = () => {
 
   const fetchAdmins = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_URL}/admin/all`, {
-        withCredentials: true,
+      const response = await fetch(`${API_URL}/admin/all`, {
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      setAdmins(response.data.admins);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch admins');
+      }
+      setAdmins(data.admins);
       setError(null);
     } catch (error) {
       setError('Failed to fetch admin list');
-    } finally {
-      setLoading(false);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/users`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+      setUsers(data.users);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  }, []);
+
+  const fetchChats = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/chats`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch chats');
+      }
+      setChats(data.chats);
+    } catch (error) {
+      console.error('Failed to fetch chats:', error);
     }
   }, []);
 
   useEffect(() => {
     const admin = localStorage.getItem('admin');
     if (!admin) {
-      console.log('No admin data in localStorage, redirecting to login...'); // Debug log
       navigate('/admin/login');
       return;
     }
     checkAuth();
     fetchAdmins();
-  }, [checkAuth, fetchAdmins, navigate]);
+    fetchUsers();
+    fetchChats();
+    setLoading(false);
+  }, [checkAuth, fetchAdmins, fetchUsers, fetchChats, navigate]);
 
   const handleLogout = async () => {
     try {
-      console.log('Logging out...'); // Debug log
-      await axios.post(`${API_URL}/admin/logout`, {}, {
-        withCredentials: true,
+      await logoutAdmin();
+      localStorage.removeItem('admin');
+      navigate('/admin/login');
+    } catch (error) {
+      setError('Logout failed. Please try again.');
+    }
+  };
+
+  const handleCreateAdmin = async (adminData) => {
+    try {
+      await createAdmin(adminData);
+      await fetchAdmins();
+      setIsPopupOpen(false);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleStatsClick = (type) => {
+    setStatsType(type);
+    setIsStatsPopupOpen(true);
+  };
+
+  const getStatsData = () => {
+    switch (statsType) {
+      case 'users':
+        return users;
+      case 'chats':
+        return chats;
+      default:
+        return [];
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      const response = await fetch(`${API_URL}/users/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      localStorage.removeItem('admin');
-      navigate('/admin/login');
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      // Refresh user list
+      await fetchUsers();
     } catch (error) {
-      console.error('Logout failed:', error.response || error); // Debug log
-      setError('Logout failed. Please try again.');
+      console.error('Delete user error:', error);
+      setError('Failed to delete user');
+    }
+  };
+
+  const handleEditUser = async (userId, userData) => {
+    try {
+      const response = await fetch(`${API_URL}/update/${userId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+
+      // Refresh user list
+      await fetchUsers();
+    } catch (error) {
+      console.error('Update user error:', error);
+      setError('Failed to update user');
     }
   };
 
@@ -115,22 +221,32 @@ const Dashboard = () => {
         </div>
 
         <div className="stats-container">
+          <div className="stat-card" onClick={() => handleStatsClick('users')}>
+            <h3>Total Users</h3>
+            <p>{users.length}</p>
+          </div>
+          <div className="stat-card" onClick={() => handleStatsClick('chats')}>
+            <h3>Total Chats</h3>
+            <p>{chats.length}</p>
+          </div>
           <div className="stat-card">
             <h3>Total Admins</h3>
             <p>{admins.length}</p>
           </div>
-          <div className="stat-card">
-            <h3>Active Users</h3>
-            <p>0</p>
-          </div>
-          <div className="stat-card">
-            <h3>Total Courses</h3>
-            <p>0</p>
-          </div>
         </div>
 
         <div className="table-container">
-          <h2>Admin List</h2>
+          <div className="table-header">
+            <h2>Admin List</h2>
+            {adminData?.role === 'super_admin' && (
+              <button 
+                className="add-admin-btn"
+                onClick={() => setIsPopupOpen(true)}
+              >
+                Add New Admin
+              </button>
+            )}
+          </div>
           <table>
             <thead>
               <tr>
@@ -153,6 +269,21 @@ const Dashboard = () => {
           </table>
         </div>
       </div>
+
+      <AddAdminPopup
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+        onSubmit={handleCreateAdmin}
+      />
+
+      <StatsPopup
+        isOpen={isStatsPopupOpen}
+        onClose={() => setIsStatsPopupOpen(false)}
+        type={statsType}
+        data={getStatsData()}
+        onDelete={handleDeleteUser}
+        onEdit={handleEditUser}
+      />
     </div>
   );
 };

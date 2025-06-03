@@ -238,7 +238,10 @@ export const loginAdmin = async (credentials) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({
+        username: credentials.username.toLowerCase(),
+        password: credentials.password
+      }),
       credentials: 'include',
     });
 
@@ -248,6 +251,8 @@ export const loginAdmin = async (credentials) => {
       throw new Error(data.message || 'Login failed');
     }
 
+    // Store admin data in localStorage
+    localStorage.setItem('admin', JSON.stringify(data.admin));
     return data;
   } catch (error) {
     console.error('Admin login error:', error);
@@ -278,17 +283,45 @@ export const logoutAdmin = async () => {
 export const checkAdminToken = async () => {
   try {
     const response = await fetch(`${API_URL}/admin/checkToken`, {
-      method: 'POST',
+      method: 'GET',
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
     if (!response.ok) {
       throw new Error('Not authenticated');
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Admin token check error:', error);
+    throw error;
+  }
+};
+
+export const createAdmin = async (adminData) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(adminData),
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create admin');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Create admin error:', error);
     throw error;
   }
 };

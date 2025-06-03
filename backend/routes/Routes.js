@@ -1,6 +1,6 @@
 import express from "express";
-import { chatWithOllama, getOllamaHistory, getChatList, getChatHistory, deleteChat } from "../controller/OllamaController.js";
-import { registerUser, loginUser, logoutUser, checkEmail, checkUsername, checkToken, updateUser, deleteUser, forgotPassword, validateResetToken, resetPassword, updateBasicInfo, updatePassword, updateEmail } from "../controller/UserController.js";
+import { chatWithOllama, getOllamaHistory, getChatList, getChatHistory, deleteChat, getAllChats } from "../controller/OllamaController.js";
+import { registerUser, loginUser, logoutUser, checkEmail, checkUsername, checkToken, updateUser, deleteUser, forgotPassword, validateResetToken, resetPassword, updateBasicInfo, updatePassword, updateEmail, getAllUsers, deleteUserById } from "../controller/UserController.js";
 import upload from "../config/multer.js";
 import { loginAdmin, logoutAdmin, createAdmin, getAllAdmins, verifyAdminToken, loginSuperAdmin, checkAdminToken } from "../controller/AdminController.js";
 
@@ -29,11 +29,14 @@ router.post("/checkToken", checkToken);
 router.post('/forgotPassword', forgotPassword); 
 router.post('/checkResetToken', validateResetToken);
 router.post('/resetPassword', resetPassword);
+router.get('/users', verifyAdminToken, getAllUsers);
+router.delete('/users/:userId', verifyAdminToken, deleteUserById);
 
 // Ollama Routes
 router.post("/:userId/ollama/chat", upload.single('file'), chatWithOllama);
 router.get("/:userId/ollama/chats", getChatList);
 router.get("/:userId/ollama/history/:chatId", getChatHistory);
-router.delete('/ollama/deleteChat', deleteChat); 
+router.delete('/ollama/deleteChat', deleteChat);
+router.get('/chats', verifyAdminToken, getAllChats);
 
 export default router;

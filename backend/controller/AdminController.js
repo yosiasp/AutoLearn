@@ -182,7 +182,6 @@ export const checkAdminToken = async (req, res) => {
 
     try {
       const decoded = jwt.verify(token, KEY);
-
       const admin = await Admin.findById(decoded.adminId);
       
       if (!admin || !admin.isActive) {
