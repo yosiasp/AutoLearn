@@ -267,7 +267,6 @@ const Home = () => {
               <div 
                 className="chat-item-content"
                 onClick={() => handleSelectChat(chat._id)}
-                style={{ flex: 1, cursor: 'pointer' }}
               >
                 <div className="chat-item-title">
                   {chat.title || chat.lastMessage || 'New Chat'}
@@ -277,46 +276,41 @@ const Home = () => {
                   {new Date(chat.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
-         <button 
-            className="delete-btn" 
-            onClick={async (e) => {
-              e.stopPropagation(); 
-              try {
-                await deleteChat({ userId: user._id, chatId: chat._id });
-
-                // UI update
-                setChatList(prev => prev.filter(c => c._id !== chat._id));
-                if (currentChatId === chat._id) {
-                  setCurrentChatId(null);
-                }
-
-                console.log("TOAST SUKSES HARUSNYA MUNCUL DI SINI");
-                toast.success('Chat Deleted Successfully', {
-                  position: "top-right",
-                  autoClose: 3000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                });
-              } catch (err) {
-                const errorMessage = err?.message;
-                toast.error(errorMessage || 'An error has occured', {
-                  position: "top-right",
-                  autoClose: 3000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                });
-              }
-            }}
-          >
-            🗑️
-          </button>
+              <div className="chat-item-menu">
+                <button
+                  className="menu-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const menu = e.currentTarget.nextSibling;
+                    menu.classList.toggle("show");
+                  }}
+                >
+                  ⋮
+                </button>
+                <div className="dropdown-menu-chat">
+                  <button 
+                    className="dropdown-delete"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        await deleteChat({ userId: user._id, chatId: chat._id });
+                        setChatList(prev => prev.filter(c => c._id !== chat._id));
+                        if (currentChatId === chat._id) {
+                          setCurrentChatId(null);
+                        }
+                        toast.success('Chat Deleted Successfully');
+                      } catch (err) {
+                        toast.error(err?.message || 'An error has occurred');
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
   </aside>
       <main className="main-chat">
         <header className="chat-header">
