@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { logout, deleteChat } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -22,20 +22,7 @@ const Home = () => {
   const dropdownRef = useRef(null);
 
   // Fetch chat list saat komponen dimuat
-  useEffect(() => {
-    if (user._id) {
-      fetchChatList();
-    }
-  }, [user._id]);
-
-  // Fetch history saat chatId berubah
-  useEffect(() => {
-    if (currentChatId) {
-      fetchHistory(currentChatId);
-    }
-  }, [currentChatId]);
-
-  const fetchChatList = async () => {
+  const fetchChatList = useCallback(async () => {
     try {
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chats`, {
         credentials: 'include'
@@ -51,9 +38,10 @@ const Home = () => {
       console.error('Error fetching chat list:', err);
       setChatList([]);
     }
-  };
+  }, [user._id, currentChatId]);
 
-  const fetchHistory = async (chatId) => {
+  // Fetch history saat chatId berubah
+  const fetchHistory = useCallback(async (chatId) => {
     try {
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/history/${chatId}`, {
         credentials: 'include'
@@ -110,7 +98,19 @@ const Home = () => {
       console.error('Error fetching history:', err);
       setHistory([]);
     }
-  };
+  }, [user._id]);
+
+  useEffect(() => {
+    if (user._id) {
+      fetchChatList();
+    }
+  }, [user._id, fetchChatList]);
+
+  useEffect(() => {
+    if (currentChatId) {
+      fetchHistory(currentChatId);
+    }
+  }, [currentChatId, fetchHistory]);
 
   const handleNewChat = () => {
     const newChatId = `chat_${Date.now()}_${user._id}`;
@@ -306,9 +306,16 @@ const Home = () => {
   const MultipleChoiceQuestion = ({ question, correctAnswer, userAnswer, onAnswer }) => {
     const options = ['a', 'b', 'c', 'd', 'e'];
 
+    const getOptionClass = (opt) => {
+      if (!userAnswer) return '';
+      if (opt === correctAnswer) return 'correct';
+      if (opt === userAnswer && opt !== correctAnswer) return 'incorrect';
+      return '';
+    };
+
     return (
-      <div className="mcq-question">
-        <pre>{question}</pre>
+      <div className="mcq-container">
+        <div className="mcq-question">{question}</div>
         <div className="mcq-options">
           {options.map((opt) => {
             const regex = new RegExp(`${opt}\\.\\s+(.*)`, 'i');
@@ -320,13 +327,24 @@ const Home = () => {
                 key={opt}
                 onClick={() => onAnswer(opt)}
                 disabled={userAnswer !== null}
-                className="mcq-option"
+                className={`mcq-option ${getOptionClass(opt)}`}
               >
-                {opt.toUpperCase()}. {match[1]}
+                <span className="option-letter">{opt.toUpperCase()}</span>
+                <span className="option-text">{match[1]}</span>
+                {userAnswer && opt === correctAnswer && (
+                  <span className="correct-indicator">✓</span>
+                )}
               </button>
             );
           })}
         </div>
+        {userAnswer && (
+          <div className={`mcq-feedback ${userAnswer === correctAnswer ? 'correct' : 'incorrect'}`}>
+            {userAnswer === correctAnswer
+              ? 'Correct! Well done!'
+              : `Incorrect. The correct answer is ${correctAnswer.toUpperCase()}.`}
+          </div>
+        )}
       </div>
     );
   };
