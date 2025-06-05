@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { logout, deleteChat } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { htmlToText } from 'html-to-text';
 import './Home.css';
 
 const Home = () => {
@@ -58,13 +59,52 @@ const Home = () => {
         credentials: 'include'
       });
       const data = await res.json();
-      const formattedHistory = Array.isArray(data) ? data.filter(item => item && typeof item === 'object').map(item => ({
-        message: item.message || '',
-        timestamp: item.timestamp || new Date(),
-        isUser: item.isUser || false,
-        status: item.status || 'sent',
-        file: item.file || null
-      })) : [];
+
+      const formattedHistory = [];
+
+      for (const item of data) {
+        if (!item || typeof item !== 'object') continue;
+
+        const isUser = item.isUser || false;
+        const timestamp = item.timestamp || new Date();
+        const file = item.file || null;
+        const status = item.status || 'sent';
+
+        if (isUser || !item.message) {
+          formattedHistory.push({
+            message: item.message || '',
+            timestamp,
+            isUser: true,
+            status,
+            file
+          });
+        } else {
+          // Processing multiple question
+          const plainText = htmlToText(item.message, {
+            wordwrap: false,
+            selectors: [{ selector: 'a', format: 'inline' }]
+          });
+
+          const answerMatches = [...plainText.matchAll(/<=jawaban:([a-dA-D])=>/gi)];
+          const splitQuestions = plainText
+            .split(/<=jawaban:[a-dA-D]=>/i)
+            .map(q => q.trim())
+            .filter(q => q.length > 0);
+
+          const aiItems = splitQuestions.map((question, index) => ({
+            message: question,
+            timestamp,
+            isUser: false,
+            status,
+            file,
+            correctAnswer: answerMatches[index] ? answerMatches[index][1].toLowerCase() : null,
+            userAnswer: item.userAnswer || null 
+          }));
+
+          formattedHistory.push(...aiItems);
+        }
+      }
+
       setHistory(formattedHistory);
     } catch (err) {
       console.error('Error fetching history:', err);
@@ -145,17 +185,13 @@ const Home = () => {
       } : null
     };
 
-    // Add temporary message to history
     setHistory(prev => [...prev, tempMessage]);
 
     try {
       const formData = new FormData();
-      if (file) {
-        formData.append('file', file);
-      }
+      if (file) formData.append('file', file);
       formData.append('message', message);
-      
-      // Use existing chatId or generate new one
+
       const chatIdToUse = currentChatId || `chat_${Date.now()}_${user._id}`;
       formData.append('chatId', chatIdToUse);
 
@@ -166,11 +202,30 @@ const Home = () => {
       });
 
       const data = await res.json();
-      
-      // Update currentChatId if it's a new chat
+      const rawMessage = data.aiResponse?.message || '';
+
+      // Bersihkan HTML jadi teks biasa
+      const plainText = htmlToText(rawMessage, {
+        wordwrap: false,
+        selectors: [{ selector: 'a', format: 'inline' }]
+      });
+
+      // Detecting all answers
+      const answerMatches = [...plainText.matchAll(/<=jawaban:([a-dA-D])=>/gi)];
+      const splitQuestions = plainText.split(/<=jawaban:[a-dA-D]=>/i).map(q => q.trim()).filter(q => q.length > 0);
+
+      const aiItems = splitQuestions.map((question, index) => ({
+        message: question,
+        timestamp: new Date(),
+        isUser: false,
+        status: 'sent',
+        correctAnswer: answerMatches[index] ? answerMatches[index][1].toLowerCase() : null,
+        userAnswer: null
+      }));
+
+      // Perbarui chatId jika baru
       if (data.chatId && !currentChatId) {
         setCurrentChatId(data.chatId);
-        // Update chat list with the new chat
         setChatList(prev => [{
           _id: data.chatId,
           title: message.substring(0, 30) + (message.length > 30 ? '...' : ''),
@@ -178,25 +233,23 @@ const Home = () => {
           lastMessage: message
         }, ...prev]);
       } else {
-        // Update existing chat in the list
-        setChatList(prev => prev.map(chat => 
-          chat._id === currentChatId 
+        setChatList(prev => prev.map(chat =>
+          chat._id === currentChatId
             ? { ...chat, lastMessage: message }
             : chat
         ));
       }
-      
-      // Update the temporary message status and add AI response
-      setHistory(prev => prev.map(msg => 
+
+      // Perbarui history: set user message ke 'sent' dan tambahkan semua soal
+      setHistory(prev => prev.map(msg =>
         msg === tempMessage ? { ...msg, status: 'sent' } : msg
-      ).concat(data.aiResponse));
+      ).concat(aiItems));
 
       setMessage("");
       setFile(null);
       setFilePreview(null);
     } catch (err) {
-      // Update the message status to error
-      setHistory(prev => prev.map(msg => 
+      setHistory(prev => prev.map(msg =>
         msg === tempMessage ? { ...msg, status: 'error' } : msg
       ));
       alert("Gagal mengirim pesan");
@@ -246,6 +299,34 @@ const Home = () => {
           </svg>
         </div>
         <span>{file.name}</span>
+      </div>
+    );
+  };
+
+  const MultipleChoiceQuestion = ({ question, correctAnswer, userAnswer, onAnswer }) => {
+    const options = ['a', 'b', 'c', 'd', 'e'];
+
+    return (
+      <div className="mcq-question">
+        <pre>{question}</pre>
+        <div className="mcq-options">
+          {options.map((opt) => {
+            const regex = new RegExp(`${opt}\\.\\s+(.*)`, 'i');
+            const match = question.match(regex);
+            if (!match) return null;
+
+            return (
+              <button
+                key={opt}
+                onClick={() => onAnswer(opt)}
+                disabled={userAnswer !== null}
+                className="mcq-option"
+              >
+                {opt.toUpperCase()}. {match[1]}
+              </button>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -360,6 +441,24 @@ const Home = () => {
                     <div className="bubble-content">
                       {item.isUser ? (
                         item.message
+                      ) : item.correctAnswer ? (
+                        <MultipleChoiceQuestion 
+                          question={item.message}
+                          correctAnswer={item.correctAnswer}
+                          userAnswer={item.userAnswer}
+                          onAnswer={(selected) => {
+                            setHistory(prev =>
+                              prev.map((msg, i) =>
+                                i === idx ? { ...msg, userAnswer: selected } : msg
+                              )
+                            );
+                            if (selected === item.correctAnswer) {
+                              toast.success("Your answer is correct!");
+                            } else {
+                              toast.error(`Your answer is wrong. The correct answer: ${item.correctAnswer.toUpperCase()}`);
+                            }
+                          }}
+                        />
                       ) : (
                         <div dangerouslySetInnerHTML={{ __html: item.message }} />
                       )}
