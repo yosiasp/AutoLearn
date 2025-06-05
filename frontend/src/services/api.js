@@ -325,3 +325,26 @@ export const createAdmin = async (adminData) => {
     throw error;
   }
 };
+
+export const deleteAccount = async (userId) => {
+  try {
+    const response = await fetch(`${API_URL}/delete/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to delete account');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Delete account error:', error);
+    throw error;
+  }
+};

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logout, updateBasicInfo, updatePassword, updateEmail } from './services/api';
+import { logout, updateBasicInfo, updatePassword, updateEmail, deleteAccount } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import './Settings.css';
 
@@ -161,6 +161,38 @@ const Settings = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const response = await deleteAccount(user._id);
+        if (response.message === 'User deleted successfully') {
+          localStorage.removeItem('user');
+          toast.success('Account deleted successfully', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error(err.message || 'Failed to delete account', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    }
+  };
+
    const selectedContent = () => {
     switch (selectedMenu) {
     case 'basic':
@@ -216,8 +248,8 @@ const Settings = () => {
         return (
           <div className="form-settings">
             <h2>Delete Account</h2>
-            <p id ="deleteWarning">Warning: This action cannot be undone. All your data will be permanently deleted.</p>
-            <button className="delete-btn">Delete My Account</button>
+            <p id="deleteWarning">Warning: This action cannot be undone. All your data will be permanently deleted.</p>
+            <button className="delete-btn" onClick={handleDeleteAccount}>Delete My Account</button>
           </div>
         );
       default:
