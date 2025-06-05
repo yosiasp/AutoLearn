@@ -115,6 +115,10 @@ export const chatWithOllama = async (req, res) => {
 
         form.append('prompt', prompt);
         if (req.file) {
+            // Saving file information
+            fileName = req.file.originalname;
+            fileType = req.file.mimetype;
+
             form.append('file', fs.createReadStream(req.file.path), req.file.originalname);
         }
 
