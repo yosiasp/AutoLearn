@@ -4,6 +4,7 @@
   background: #10182a;
   color: #FAF9F6;
   font-family: 'Manrope', sans-serif;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -14,6 +15,8 @@
   align-items: center;
   padding: 24px 0;
   border-right: 1px solid #232c4b;
+  height: 100vh;
+    overflow-y: auto;
 }
 
 .logo {
@@ -140,6 +143,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+    overflow: hidden;
 }
 
 .chat-header {
@@ -149,6 +154,7 @@
   background: #181f36;
   padding: 16px 24px;
   border-bottom: 1px solid #232c4b;
+  flex-shrink: 0;
 }
 
 .user-profile {
@@ -276,6 +282,7 @@
   background-image:
       radial-gradient(circle at 100% 0%, rgba(90, 45, 224, 0.03) 0%, transparent 50%),
       radial-gradient(circle at 0% 100%, rgba(90, 45, 224, 0.03) 0%, transparent 50%);
+  position: relative;
 }
 
 .chat-footer {
@@ -285,6 +292,7 @@
   background: #181f36;
   border-top: 1px solid #232c4b;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .chat-input {
