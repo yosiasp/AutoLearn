@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { logout, deleteChat } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -19,10 +19,24 @@ const Home = () => {
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const dropdownRef = useRef(null);
 
   // Fetch chat list saat komponen dimuat
-  const fetchChatList = useCallback(async () => {
+  useEffect(() => {
+    if (user._id) {
+      fetchChatList();
+    }
+  }, [user._id]);
+
+  // Fetch history saat chatId berubah
+  useEffect(() => {
+    if (currentChatId) {
+      fetchHistory(currentChatId);
+    }
+  }, [currentChatId]);
+
+  const fetchChatList = async () => {
     try {
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/chats`, {
         credentials: 'include'
@@ -38,10 +52,10 @@ const Home = () => {
       console.error('Error fetching chat list:', err);
       setChatList([]);
     }
-  }, [user._id, currentChatId]);
+  };
 
   // Fetch history saat chatId berubah
-  const fetchHistory = useCallback(async (chatId) => {
+  const fetchHistory = async (chatId) => {
     try {
       const res = await fetch(`http://localhost:8000/api/${user._id}/ollama/history/${chatId}`, {
         credentials: 'include'
@@ -98,19 +112,7 @@ const Home = () => {
       console.error('Error fetching history:', err);
       setHistory([]);
     }
-  }, [user._id]);
-
-  useEffect(() => {
-    if (user._id) {
-      fetchChatList();
-    }
-  }, [user._id, fetchChatList]);
-
-  useEffect(() => {
-    if (currentChatId) {
-      fetchHistory(currentChatId);
-    }
-  }, [currentChatId, fetchHistory]);
+  };
 
   const handleNewChat = () => {
     const newChatId = `chat_${Date.now()}_${user._id}`;
@@ -233,11 +235,20 @@ const Home = () => {
           lastMessage: message
         }, ...prev]);
       } else {
-        setChatList(prev => prev.map(chat =>
-          chat._id === currentChatId
-            ? { ...chat, lastMessage: message }
-            : chat
-        ));
+        // Updating the chat title and date
+        setChatList(prev =>
+          prev.map(chat => {
+            if (chat._id === currentChatId) {
+              const newTitle = chat.title === 'New Chat' ? (message.substring(0, 30) + (message.length > 30 ? '...' : '')) : chat.title;
+              return {
+                ...chat,
+                title: newTitle,
+                lastMessage: message,
+              };
+            }
+            return chat;
+          })
+        );
       }
 
       // Perbarui history: set user message ke 'sent' dan tambahkan semua soal
@@ -352,7 +363,7 @@ const Home = () => {
   return (
     <div className="home-root">
       <ToastContainer />
-      <aside className="sidebar">
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
         <div className="logo">
           <img src="/logo.png" alt="Logo" />
         </div>
@@ -411,8 +422,27 @@ const Home = () => {
           ))}
         </div>
   </aside>
-      <main className="main-chat">
+      <main className={`main-chat ${isSidebarOpen ? '' : 'full-width'}`}>
         <header className="chat-header">
+        <button 
+          className="toggle-sidebar-btn"
+          onClick={() => setIsSidebarOpen(prev => !prev)}
+          aria-label="Toggle sidebar"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {isSidebarOpen ? (
+              <>
+                <path d="M18 17L13 12L18 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M11 17L6 12L11 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </>
+            ) : (
+              <>
+                <path d="M6 17L11 12L6 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M13 17L18 12L13 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </>
+            )}
+          </svg>
+        </button>
           <span>Current Chat</span>
           <div className="user-profile" ref={dropdownRef} onClick={toggleDropdown}>
             <div className="user-info">

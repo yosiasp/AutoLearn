@@ -8,7 +8,10 @@
 }
 
 .sidebar {
+  position: relative;
   width: 220px;
+  transform: translateX(0); 
+  transition: transform 0.3s ease-in-out;
   background: #181f36;
   display: flex;
   flex-direction: column;
@@ -16,7 +19,29 @@
   padding: 24px 0;
   border-right: 1px solid #232c4b;
   height: 100vh;
-    overflow-y: auto;
+  overflow-y: auto;
+  z-index: 10; 
+}
+
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+.main-chat {
+  transition: margin-left 0.3s ease-in-out;
+  margin-left: 0px;
+}
+
+.main-chat.full-width {
+  margin-left: -300px;
+}
+
+.toggle-sidebar-btn {
+  margin-right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
 }
 
 .logo {
