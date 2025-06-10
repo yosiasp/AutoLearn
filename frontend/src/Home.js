@@ -123,6 +123,12 @@ const Home = () => {
     setFilePreview(null);
     // Adding new chat on the list only if the current chat is not empty (avoiding repetitive new empty chat)
     if (history.length !== 0){
+      // Erasing existing 'New Chat" to avoid duplicate
+      setChatList(prev => {
+        const filteredChats = prev.filter(chat => chat.title !== 'New Chat');
+        return filteredChats;
+      });
+
       setChatList(prev => [{
         _id: newChatId,
         title: 'New Chat',
@@ -424,25 +430,25 @@ const Home = () => {
   </aside>
       <main className={`main-chat ${isSidebarOpen ? '' : 'full-width'}`}>
         <header className="chat-header">
-        <button 
-          className="toggle-sidebar-btn"
-          onClick={() => setIsSidebarOpen(prev => !prev)}
-          aria-label="Toggle sidebar"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {isSidebarOpen ? (
-              <>
-                <path d="M18 17L13 12L18 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M11 17L6 12L11 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </>
-            ) : (
-              <>
-                <path d="M6 17L11 12L6 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M13 17L18 12L13 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </>
-            )}
-          </svg>
-        </button>
+          <button 
+            className="toggle-sidebar-btn"
+            onClick={() => setIsSidebarOpen(prev => !prev)}
+            aria-label="Toggle sidebar"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {isSidebarOpen ? (
+                <>
+                  <path d="M18 17L13 12L18 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M11 17L6 12L11 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </>
+              ) : (
+                <>
+                  <path d="M6 17L11 12L6 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M13 17L18 12L13 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </>
+              )}
+            </svg>
+          </button>
           <span>Current Chat</span>
           <div className="user-profile" ref={dropdownRef} onClick={toggleDropdown}>
             <div className="user-info">

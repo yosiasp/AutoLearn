@@ -1,3 +1,12 @@
+.settings-root {
+  display: flex;
+  height: 100vh;
+  background: #10182a;
+  color: #FAF9F6;
+  font-family: 'Manrope', sans-serif;
+  overflow: hidden;
+}
+
 .form-settings {
   display: flex;
   flex-direction: column;
@@ -52,14 +61,6 @@
   color:#ff4d4f;
 }
 
-.settings-root {
-  display: flex;
-  height: 100vh;
-  background: #10182a;
-  color: #FAF9F6;
-  font-family: 'Manrope', sans-serif;
-}
-
 .sidebar {
   width: 220px;
   background: #181f36;
@@ -68,6 +69,27 @@
   align-items: center;
   padding: 24px 0;
   border-right: 1px solid #232c4b;
+}
+
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+  margin-left: 0px;
+}
+
+.main-content.full-width {
+  margin-left: -300px;
+}
+
+.toggle-sidebar-btn {
+  margin-right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
 }
 
 .logo {
@@ -106,6 +128,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .content-header {
@@ -115,6 +139,7 @@
   background: #181f36;
   padding: 16px 24px;
   border-bottom: 1px solid #232c4b;
+  flex-shrink: 0;
 }
 
 .user-profile {

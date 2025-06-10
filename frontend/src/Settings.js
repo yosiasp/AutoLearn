@@ -17,6 +17,7 @@ const Settings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('basic'); // default menu
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [, setError] = useState('');
   const dropdownRef = useRef(null);
 
@@ -211,17 +212,16 @@ const Settings = () => {
         </form>
       );
     case 'account':
-    return (
-      <form className="form-settings" onSubmit={handleUpdateEmail}>
-        <h2>Account Info</h2>
-        <label>
-          Email Address:
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}/>
-        </label>
-        <button type="submit">Update Email</button>
-      </form>
-    );
-
+      return (
+        <form className="form-settings" onSubmit={handleUpdateEmail}>
+          <h2>Account Info</h2>
+          <label>
+            Email Address:
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}/>
+          </label>
+          <button type="submit">Update Email</button>
+        </form>
+      );
     case 'password':
       return (
         <form className="form-settings" onSubmit={handleUpdatePassword}>
@@ -260,7 +260,7 @@ const Settings = () => {
   return (
     <div className="settings-root">
       <ToastContainer />
-      <aside className="sidebar">
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
         <div className="logo">
           <img src="/logo.png" alt="Logo"/>
         </div>
@@ -269,8 +269,27 @@ const Settings = () => {
         <button className={`sidebar-btn ${selectedMenu === 'password' ? 'active' : ''}`} onClick={() => setSelectedMenu('password')}>Change Password</button>
         <button className={`sidebar-btn ${selectedMenu === 'delete' ? 'active' : ''}`} onClick={() => setSelectedMenu('delete')}>Delete Account</button>
       </aside>
-      <main className="main-content">
+      <main className={`main-content ${isSidebarOpen ? '' : 'full-width'}`}>
         <header className="content-header">
+          <button 
+            className="toggle-sidebar-btn"
+            onClick={() => setIsSidebarOpen(prev => !prev)}
+            aria-label="Toggle sidebar"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {isSidebarOpen ? (
+                <>
+                  <path d="M18 17L13 12L18 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M11 17L6 12L11 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </>
+              ) : (
+                <>
+                  <path d="M6 17L11 12L6 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M13 17L18 12L13 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </>
+              )}
+            </svg>
+          </button>
           <span>{selectedMenu === 'basic' ? 'Basic Info' : selectedMenu === 'account' ? 'Account Info' : 'Delete Account'}</span> 
           <div className="user-profile" ref={dropdownRef} onClick={toggleDropdown}>
             <div className="user-info">
