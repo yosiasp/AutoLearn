@@ -338,6 +338,28 @@
     box-shadow: 0 0 0 4px rgba(90, 45, 224, 0.1);
 }
 
+.loading-dots span {
+  animation: blink 1.4s infinite both;
+  display: inline-block;
+  font-weight: bold;
+  font-size: 20px;
+  color: #aaa;
+  margin-right: 2px;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
 .send-btn {
   background: linear-gradient(135deg, #5a2de0, #4338ca);
   color: #FAF9F6;

@@ -193,7 +193,16 @@ const Home = () => {
       } : null
     };
 
-    setHistory(prev => [...prev, tempMessage]);
+    setHistory(prev => [
+      ...prev,
+      tempMessage,
+      {
+        message: "",
+        timestamp: new Date(),
+        isUser: false,
+        status: 'loading' 
+      }
+    ]);
 
     try {
       const formData = new FormData();
@@ -208,6 +217,10 @@ const Home = () => {
         body: formData,
         credentials: 'include',
       });
+
+      if (!res || !res.ok) {
+        throw new Error(`API response is invalid or failed. Status: ${res?.status}`);
+      }
 
       const data = await res.json();
       const rawMessage = data.aiResponse?.message || '';
@@ -258,18 +271,26 @@ const Home = () => {
       }
 
       // Perbarui history: set user message ke 'sent' dan tambahkan semua soal
-      setHistory(prev => prev.map(msg =>
-        msg === tempMessage ? { ...msg, status: 'sent' } : msg
-      ).concat(aiItems));
+      setHistory(prev => 
+        prev
+          .filter(msg => msg !== tempMessage && msg.status !== 'loading') // Removing loading AI chat bubble
+          .concat([
+            { ...tempMessage, status: 'sent' }, 
+            ...aiItems
+          ])
+      );
 
       setMessage("");
       setFile(null);
       setFilePreview(null);
     } catch (err) {
-      setHistory(prev => prev.map(msg =>
-        msg === tempMessage ? { ...msg, status: 'error' } : msg
-      ));
-      alert("Gagal mengirim pesan");
+      setHistory(prev => 
+        prev
+          .filter(msg => msg.status !== 'loading') 
+          .map(msg => msg === tempMessage ? { ...msg, status: 'error' } : msg)
+      );
+      toast.error("Failed to connect to AI");
+      console.error("API Error:", err);
     } finally {
       setIsSending(false);
     }
@@ -493,7 +514,11 @@ const Home = () => {
                   <div key={idx} className={`chat-bubble ${item.isUser ? 'user' : 'bot'}`}>
                     {item.file && renderFilePreview(item.file)}
                     <div className="bubble-content">
-                      {item.isUser ? (
+                      {item.status === 'loading' ? (
+                        <div className="loading-dots">
+                          <span>.</span><span>.</span><span>.</span>
+                        </div>
+                      ) : item.isUser ? (
                         item.message
                       ) : item.correctAnswer ? (
                         <MultipleChoiceQuestion 
@@ -519,7 +544,7 @@ const Home = () => {
                     </div>
                     <div className="bubble-meta">
                       <span className="bubble-time">{formatTime(item.timestamp)}</span>
-                      {item.status === 'sending' && <span className="bubble-status">Sending...</span>}
+                      {item.status === 'sending' && <span className="bubble-status">Processing...</span>}
                       {item.status === 'error' && <span className="bubble-status error">Failed to send</span>}
                     </div>
                   </div>
