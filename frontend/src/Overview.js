@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Overview.css';
 
 const Overview = () => {
+  // Title
+  useEffect(() => {
+    document.title = "Autolearn";
+  }, []);
+
   const navigate = useNavigate();
 
   return (
